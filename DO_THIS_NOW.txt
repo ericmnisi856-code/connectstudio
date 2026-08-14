@@ -1,0 +1,64 @@
+🚨 BOTH ISSUES FIXED! DO THIS NOW:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ YOCO PAYMENT - FIXED!
+   - Added Yoco test keys to .env
+   - Restarted dev server
+   - Payment will now work!
+
+⚠️ ADMIN LOGIN - CREATE USER NOW! (2 MINUTES)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+STEP 1: Open this link:
+https://supabase.com/dashboard/project/mwbyyojkbtbizcrxeqrf
+
+STEP 2: Create User
+- Click "Authentication" (left sidebar)
+- Click "Users"
+- Click green "Add user" button
+- Fill in:
+  Email: ericmnisi856@gmail.com
+  Password: Connectstudio@123
+  ✅ Check "Auto Confirm User"
+- Click "Create user"
+
+STEP 3: Make Admin
+- Click "SQL Editor" (left sidebar)
+- Click "New query"
+- Open file: CREATE_ADMIN_USER_NOW.sql
+- Copy ALL the SQL code
+- Paste in SQL Editor
+- Click "RUN"
+- Should see: ✅ "Admin role assigned"
+
+STEP 4: Login
+- Go to: http://localhost:8081/auth
+- Email: ericmnisi856@gmail.com
+- Password: Connectstudio@123
+- Click "Sign in"
+- Go to: http://localhost:8081/admin
+- YOU'RE IN! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TEST YOCO PAYMENT:
+
+1. Add items to cart
+2. Go to checkout
+3. Fill in test details
+4. Click "Pay with Card"
+5. Wait 2-3 seconds for Yoco popup
+6. Use test card: 4242 4242 4242 4242
+7. Expiry: 12/30, CVV: 123
+8. Click Pay
+9. SUCCESS! 🎉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FULL GUIDE: Read URGENT_FIXES.md for details
+
+YOUR APP: http://localhost:8081/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

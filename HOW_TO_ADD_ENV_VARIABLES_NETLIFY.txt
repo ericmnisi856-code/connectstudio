@@ -1,0 +1,155 @@
+═══════════════════════════════════════════════════════════════
+  HOW TO ADD ENVIRONMENT VARIABLES IN NETLIFY
+  STEP-BY-STEP GUIDE (EASY!)
+═══════════════════════════════════════════════════════════════
+
+📖 FOLLOW THESE EXACT STEPS:
+
+───────────────────────────────────────────────────────────────
+STEP 1: LOG INTO NETLIFY
+───────────────────────────────────────────────────────────────
+
+1. Go to: https://app.netlify.com/
+2. Sign in with your account
+3. You'll see your sites dashboard
+
+───────────────────────────────────────────────────────────────
+STEP 2: FIND YOUR SITE
+───────────────────────────────────────────────────────────────
+
+1. Look for your site in the list
+2. It might be called something like:
+   - "studio-green-flow"
+   - Or a random name like "silly-unicorn-123456"
+3. Click on the site name to open it
+
+───────────────────────────────────────────────────────────────
+STEP 3: GO TO SITE SETTINGS
+───────────────────────────────────────────────────────────────
+
+At the top of the page, you'll see tabs:
+- Site overview
+- Deploys
+- Integrations
+- Site settings ← CLICK THIS ONE
+
+───────────────────────────────────────────────────────────────
+STEP 4: FIND ENVIRONMENT VARIABLES
+───────────────────────────────────────────────────────────────
+
+In the left sidebar, look for:
+- Build & deploy
+- Environment variables ← CLICK THIS ONE
+
+OR just scroll down on the Settings page until you see:
+"Environment variables"
+
+───────────────────────────────────────────────────────────────
+STEP 5: ADD VARIABLES (DO THIS 3 TIMES)
+───────────────────────────────────────────────────────────────
+
+You'll see a button that says:
+"Add a variable" or "Add environment variable"
+
+For EACH variable from NETLIFY_ENV_VARIABLES.txt:
+
+1. Click "Add a variable"
+2. You'll see two boxes:
+   - Key (left box)
+   - Value (right box)
+3. Copy the "Key" from the txt file → Paste into left box
+4. Copy the "Value" from the txt file → Paste into right box
+5. Click "Create variable" or "Save"
+6. Repeat for all 3 variables
+
+───────────────────────────────────────────────────────────────
+EXAMPLE: Adding the first variable
+───────────────────────────────────────────────────────────────
+
+Click "Add a variable"
+
+Left box (Key):
+YOCO_SECRET_KEY
+
+Right box (Value):
+sk_test_f65fbbd2lVeRkvPc7704c37b6dc8
+
+Click "Create variable"
+
+Then do the same for the other 8 variables!
+
+───────────────────────────────────────────────────────────────
+⚠️ SPECIAL NOTE FOR VARIABLE 3 (VITE_APP_URL)
+───────────────────────────────────────────────────────────────
+
+For this one, you need to use YOUR Netlify site URL!
+
+1. Go back to "Site overview" (top tabs)
+2. Look for "Site is live at:" or your site URL
+3. It will look like: https://your-site-name.netlify.app
+4. COPY this URL
+5. Go back to Environment variables
+6. Add variable:
+   
+   Key:   VITE_APP_URL
+   Value: https://your-site-name.netlify.app  (YOUR copied URL)
+
+───────────────────────────────────────────────────────────────
+STEP 6: TRIGGER NEW DEPLOYMENT
+───────────────────────────────────────────────────────────────
+
+After adding all variables:
+
+1. Click "Deploys" tab at the top
+2. Click "Trigger deploy" button (gray button, top right)
+3. Select "Clear cache and deploy site"
+4. Wait 3-5 minutes for build to complete
+5. ✅ Your site should be live!
+
+───────────────────────────────────────────────────────────────
+QUICK CHECKLIST ✅
+───────────────────────────────────────────────────────────────
+
+□ Logged into Netlify
+□ Found my site
+□ Clicked "Site settings"
+□ Clicked "Environment variables" in sidebar
+□ Added all 3 variables (copy-paste from txt file)
+□ Updated VITE_APP_URL with my actual Netlify URL
+□ Clicked "Deploys" tab
+□ Clicked "Trigger deploy" → "Clear cache and deploy site"
+□ Waited for build to finish
+□ Checked site is live and working
+
+───────────────────────────────────────────────────────────────
+TROUBLESHOOTING
+───────────────────────────────────────────────────────────────
+
+❌ Can't find "Environment variables"?
+   → Look under "Site settings" → Left sidebar → "Environment variables"
+   → Or scroll down on Settings page
+
+❌ Deploy still failing?
+   → Make sure ALL 3 variables are added
+   → Check for typos in variable names (they're case-sensitive!)
+   → Make sure you used YOUR Netlify URL for VITE_APP_URL
+
+❌ Site loads but payment doesn't work?
+   → Check YOCO_SECRET_KEY and VITE_YOCO_PUBLIC_KEY are correct
+   → Check VITE_APP_URL matches your actual Netlify domain
+
+───────────────────────────────────────────────────────────────
+
+📱 NEED HELP? 
+
+If you're stuck:
+1. Open NETLIFY_ENV_VARIABLES.txt
+2. Copy each Key/Value pair carefully
+3. Make sure no extra spaces or line breaks
+4. All 3 variables must be added
+
+═══════════════════════════════════════════════════════════════
+
+✨ Once done, your site will be live and fully functional! ✨
+
+═══════════════════════════════════════════════════════════════

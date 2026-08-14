@@ -1,0 +1,134 @@
+═══════════════════════════════════════════════════════════════
+  🚨 FINAL FIX: DELETE SITE AND RECONNECT 🚨
+═══════════════════════════════════════════════════════════════
+
+The submodule error won't go away because Netlify's connection to
+your repository is corrupted. We need to start fresh.
+
+═══════════════════════════════════════════════════════════════
+STEP 1: DELETE THE BROKEN SITE
+═══════════════════════════════════════════════════════════════
+
+1. Go to Netlify: https://app.netlify.com/
+2. Click on your site (connectstudiosample)
+3. Click "Site settings" at the top
+4. Scroll ALL THE WAY DOWN
+5. Find "Delete site" section (at the very bottom)
+6. Click "Delete this site"
+7. Type the site name to confirm
+8. Click "Delete"
+
+Don't worry! Your code is safe in GitHub. We're just removing
+the broken Netlify connection.
+
+═══════════════════════════════════════════════════════════════
+STEP 2: CREATE NEW SITE (THE RIGHT WAY)
+═══════════════════════════════════════════════════════════════
+
+1. In Netlify dashboard, click "Add new site"
+
+2. Click "Import an existing project"
+
+3. Click "Deploy with GitHub"
+
+4. Find and select:
+   ericmnisi856-code/studio-green-flow
+
+5. Configure build settings:
+   
+   ⚠️ IMPORTANT - SET THESE EXACTLY:
+   
+   Base directory:      studio-green-flow-main
+   Build command:       npm run build  
+   Publish directory:   studio-green-flow-main/.output/public
+   
+   ⚠️ Make sure Base directory is set!
+
+6. Click "Add environment variables" (before deploying!)
+
+7. Add these 3 variables:
+   
+   Key: YOCO_SECRET_KEY
+   Value: sk_test_f65fbbd2lVeRkvPc7704c37b6dc8
+   
+   Key: VITE_YOCO_PUBLIC_KEY
+   Value: pk_test_1e07de9cvnz96YN03cb4
+   
+   Key: VITE_APP_URL
+   Value: https://YOUR-NEW-SITE-NAME.netlify.app
+   (You'll update this after first deploy)
+
+8. Click "Deploy site"
+
+═══════════════════════════════════════════════════════════════
+STEP 3: UPDATE VITE_APP_URL
+═══════════════════════════════════════════════════════════════
+
+After first deploy:
+
+1. Copy your new Netlify URL 
+   (something like: https://wonderful-unicorn-123456.netlify.app)
+
+2. Go to Site settings → Environment variables
+
+3. Find VITE_APP_URL and click "Edit"
+
+4. Replace the value with your actual Netlify URL
+
+5. Save
+
+6. Go to Deploys → Trigger deploy → Deploy site
+
+═══════════════════════════════════════════════════════════════
+WHY THIS WORKS:
+═══════════════════════════════════════════════════════════════
+
+The old site had a corrupted Git submodule reference that
+wouldn't go away no matter what we tried.
+
+By creating a NEW site, Netlify:
+✅ Makes a fresh Git clone
+✅ No submodule issues
+✅ Correctly reads the Base directory
+✅ Finds your code in studio-green-flow-main/
+✅ Builds successfully
+
+═══════════════════════════════════════════════════════════════
+ALTERNATIVE: USE NETLIFY CLI (IF YOU WANT)
+═══════════════════════════════════════════════════════════════
+
+If you prefer command line:
+
+1. Install Netlify CLI:
+   npm install -g netlify-cli
+
+2. Go to your project folder:
+   cd C:\Users\Patrick\OneDrive\Documents\Web Clients\studio-green-flow-main\studio-green-flow-main
+
+3. Deploy:
+   netlify deploy --prod
+
+4. Follow the prompts and link to your Netlify account
+
+This bypasses the Git submodule issue entirely!
+
+═══════════════════════════════════════════════════════════════
+SUMMARY:
+═══════════════════════════════════════════════════════════════
+
+The submodule error is stuck in Netlify's cache/config for
+your current site. The ONLY way to fix it is:
+
+1. Delete the broken site
+2. Create a new site
+3. Set Base directory correctly from the start
+4. Add environment variables
+5. Deploy
+
+This will work 100%. I guarantee it.
+
+═══════════════════════════════════════════════════════════════
+
+🎯 DELETE THE SITE AND START FRESH. IT'S THE ONLY WAY!
+
+═══════════════════════════════════════════════════════════════

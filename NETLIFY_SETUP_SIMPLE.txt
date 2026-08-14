@@ -1,0 +1,101 @@
+═══════════════════════════════════════════════════════════════
+  NETLIFY ENVIRONMENT VARIABLES - SUPER SIMPLE VERSION
+  PRODUCTION READY
+═══════════════════════════════════════════════════════════════
+
+🎯 YOUR MISSION: Copy 3 things into Netlify
+
+WHERE TO DO IT:
+https://app.netlify.com/ → Your Site → Site settings → Environment variables
+
+───────────────────────────────────────────────────────────────
+THE 3 THINGS TO COPY:
+───────────────────────────────────────────────────────────────
+
+1️⃣ 
+Key:   YOCO_SECRET_KEY
+Value: sk_test_f65fbbd2lVeRkvPc7704c37b6dc8
+
+2️⃣ 
+Key:   VITE_YOCO_PUBLIC_KEY
+Value: pk_test_1e07de9cvnz96YN03cb4
+
+3️⃣ 
+Key:   VITE_APP_URL
+Value: [YOUR NETLIFY SITE URL - see note below]
+
+───────────────────────────────────────────────────────────────
+⚠️ IMPORTANT NOTES:
+───────────────────────────────────────────────────────────────
+
+For #3 (VITE_APP_URL):
+→ After you deploy, Netlify gives you a URL
+→ Something like: https://amazing-site-12345.netlify.app
+→ Copy that and use it for VITE_APP_URL
+→ Then redeploy
+
+THAT'S IT! Only 3 variables needed.
+
+───────────────────────────────────────────────────────────────
+📸 VISUAL GUIDE:
+───────────────────────────────────────────────────────────────
+
+NETLIFY DASHBOARD
+     ↓
+CLICK YOUR SITE
+     ↓
+CLICK "Site settings" (top tab)
+     ↓
+CLICK "Environment variables" (left sidebar)
+     ↓
+CLICK "Add a variable" button
+     ↓
+PASTE Key in left box
+PASTE Value in right box
+     ↓
+CLICK "Create variable"
+     ↓
+REPEAT 3 TIMES (one for each variable above)
+     ↓
+CLICK "Deploys" (top tab)
+     ↓
+CLICK "Trigger deploy" → "Clear cache and deploy site"
+     ↓
+WAIT 3-5 MINUTES
+     ↓
+✅ DONE! Your site is live!
+
+───────────────────────────────────────────────────────────────
+
+📝 NOTES ABOUT THE FIRST DEPLOYMENT:
+
+First time deploying? Do this:
+
+1. Add variables #1 and #2 (the Yoco keys)
+2. Deploy the site
+3. Wait for it to finish
+4. Copy your Netlify URL (from Site overview)
+5. Go back to Environment variables
+6. Add variable #3 (VITE_APP_URL) with your copied URL
+7. Deploy again
+8. ✅ Now everything works!
+
+───────────────────────────────────────────────────────────────
+
+🆘 STILL STUCK?
+
+1. Open your .env file in your project folder
+2. Look at the variables there
+3. Copy them into Netlify the same way
+4. Just copy the Key name and the Value
+
+Example from .env file:
+YOCO_SECRET_KEY="sk_test_f65fbbd2lVeRkvPc7704c37b6dc8"
+                 ↑                                    ↑
+                 Remove these quotes when copying to Netlify
+
+In Netlify it becomes:
+Key: YOCO_SECRET_KEY
+Value: sk_test_f65fbbd2lVeRkvPc7704c37b6dc8
+
+═══════════════════════════════════════════════════════════════

@@ -1,0 +1,118 @@
+═══════════════════════════════════════════════════════════════
+  🚨 URGENT: NETLIFY BASE DIRECTORY FIX 🚨
+═══════════════════════════════════════════════════════════════
+
+THE PROBLEM:
+Your repository has a nested structure:
+studio-green-flow-main/
+  └── studio-green-flow-main/  ← Your actual code is HERE
+      ├── src/
+      ├── package.json
+      └── etc...
+
+Netlify is looking at the ROOT but your code is INSIDE the
+subfolder, causing a "submodule" error.
+
+═══════════════════════════════════════════════════════════════
+THE FIX - DO THIS NOW IN NETLIFY:
+═══════════════════════════════════════════════════════════════
+
+1. Go to your Netlify dashboard
+   https://app.netlify.com/
+
+2. Click on your site (connectstudiosample or whatever name)
+
+3. Click "Site settings" (top navigation)
+
+4. Click "Build & deploy" (left sidebar)
+
+5. Scroll down to "Build settings"
+
+6. Click "Edit settings" button
+
+7. You'll see these fields:
+
+   Base directory:  [EMPTY] ← SET THIS!
+   Build command:   npm run build
+   Publish directory: .output/public
+   Functions directory: .output/server
+
+8. In "Base directory" field, type:
+   
+   studio-green-flow-main
+
+9. Click "Save"
+
+10. Go to "Deploys" tab (top)
+
+11. Click "Trigger deploy" → "Clear cache and deploy site"
+
+12. ✅ IT WILL WORK NOW!
+
+═══════════════════════════════════════════════════════════════
+VISUAL GUIDE:
+═══════════════════════════════════════════════════════════════
+
+Netlify Dashboard
+     ↓
+Your Site
+     ↓
+Site settings (top tab)
+     ↓
+Build & deploy (left sidebar)
+     ↓
+Build settings section
+     ↓
+Click "Edit settings" button
+     ↓
+Base directory: studio-green-flow-main ← TYPE THIS
+     ↓
+Click "Save"
+     ↓
+Deploys tab
+     ↓
+Trigger deploy → Clear cache and deploy site
+     ↓
+✅ DONE!
+
+═══════════════════════════════════════════════════════════════
+WHY THIS WORKS:
+═══════════════════════════════════════════════════════════════
+
+Before: Netlify looked at root → couldn't find package.json
+        because it's inside studio-green-flow-main/
+
+After:  Netlify looks inside studio-green-flow-main/ first
+        → finds package.json → builds successfully!
+
+═══════════════════════════════════════════════════════════════
+WHAT YOU'LL SEE:
+═══════════════════════════════════════════════════════════════
+
+After saving, when you deploy:
+✅ No more submodule error
+✅ Build will find package.json
+✅ npm install will work
+✅ Build will complete
+✅ Site will be live!
+
+═══════════════════════════════════════════════════════════════
+DOUBLE CHECK YOUR SETTINGS:
+═══════════════════════════════════════════════════════════════
+
+In Build & deploy → Build settings, you should see:
+
+Base directory:      studio-green-flow-main
+Build command:       npm run build
+Publish directory:   .output/public
+Functions directory: .output/server
+
+If it looks like this, you're good to deploy!
+
+═══════════════════════════════════════════════════════════════
+
+🎯 THIS WILL FIX YOUR DEPLOYMENT 100%!
+
+Just set the Base directory and redeploy. That's it!
+
+═══════════════════════════════════════════════════════════════

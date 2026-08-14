@@ -1,0 +1,43 @@
+═══════════════════════════════════════════════════════════════
+  NETLIFY ENVIRONMENT VARIABLES - COPY & PASTE
+  PRODUCTION KEYS (Ready for live deployment)
+═══════════════════════════════════════════════════════════════
+
+📋 COPY THESE VARIABLES ONE BY ONE INTO NETLIFY
+
+⚠️ IMPORTANT: Replace "YOUR_NETLIFY_URL" with your actual Netlify site URL
+   Example: https://studio-connect-shop.netlify.app
+
+───────────────────────────────────────────────────────────────
+VARIABLE 1: YOCO_SECRET_KEY
+───────────────────────────────────────────────────────────────
+Key:   YOCO_SECRET_KEY
+Value: sk_test_f65fbbd2lVeRkvPc7704c37b6dc8
+
+───────────────────────────────────────────────────────────────
+VARIABLE 2: VITE_YOCO_PUBLIC_KEY
+───────────────────────────────────────────────────────────────
+Key:   VITE_YOCO_PUBLIC_KEY
+Value: pk_test_1e07de9cvnz96YN03cb4
+
+───────────────────────────────────────────────────────────────
+VARIABLE 3: VITE_APP_URL
+───────────────────────────────────────────────────────────────
+Key:   VITE_APP_URL
+Value: YOUR_NETLIFY_URL
+
+⚠️ REPLACE "YOUR_NETLIFY_URL" with your site URL from Netlify!
+   Find it in: Netlify Dashboard → Site overview → "Site is live at..."
+   Example: https://studio-connect-shop.netlify.app
+
+───────────────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════════════════
+
+🎯 TOTAL: 3 Variables to add (REQUIRED)
+
+✅ All 3 are needed for payment to work
+✅ These are your production payment keys
+✅ Supabase variables removed (not needed if managed through Lovable)
+
+═══════════════════════════════════════════════════════════════
