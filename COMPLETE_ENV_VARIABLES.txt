@@ -1,0 +1,135 @@
+═══════════════════════════════════════════════════════════════
+  COMPLETE NETLIFY ENVIRONMENT VARIABLES
+  ALL 9 REQUIRED VARIABLES FOR YOUR SITE TO WORK
+═══════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANT: You need to add ALL 9 of these to Netlify!
+
+How to add them:
+1. Go to: https://app.netlify.com
+2. Click on your site
+3. Site Settings → Environment Variables
+4. Click "Add a variable" for each one below
+5. After adding all 9, trigger a new deploy
+
+═══════════════════════════════════════════════════════════════
+SUPABASE VARIABLES (6 total)
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+1. SUPABASE_URL
+───────────────────────────────────────────────────────────────
+Value: https://qccwgssqemkfxkgustuh.supabase.co
+
+───────────────────────────────────────────────────────────────
+2. VITE_SUPABASE_URL
+───────────────────────────────────────────────────────────────
+Value: https://qccwgssqemkfxkgustuh.supabase.co
+
+───────────────────────────────────────────────────────────────
+3. SUPABASE_PROJECT_ID
+───────────────────────────────────────────────────────────────
+Value: qccwgssqemkfxkgustuh
+
+───────────────────────────────────────────────────────────────
+4. VITE_SUPABASE_PROJECT_ID
+───────────────────────────────────────────────────────────────
+Value: qccwgssqemkfxkgustuh
+
+───────────────────────────────────────────────────────────────
+5. SUPABASE_PUBLISHABLE_KEY
+───────────────────────────────────────────────────────────────
+Value: GET THIS FROM SUPABASE!
+
+How to get it:
+1. Go to: https://supabase.com/dashboard
+2. Click on your project (qccwgssqemkfxkgustuh)
+3. Click Settings (gear icon) → API
+4. Find "Project API keys" section
+5. Copy the "anon" "public" key (starts with "eyJ...")
+6. Paste it here
+
+───────────────────────────────────────────────────────────────
+6. VITE_SUPABASE_PUBLISHABLE_KEY
+───────────────────────────────────────────────────────────────
+Value: SAME AS ABOVE (same key, just copy it again)
+
+═══════════════════════════════════════════════════════════════
+YOCO PAYMENT VARIABLES (2 total)
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+7. YOCO_SECRET_KEY
+───────────────────────────────────────────────────────────────
+Value: [GET FROM YOUR .env FILE - starts with sk_live_]
+
+⚠️ SECURITY: Don't share this key publicly!
+Open your local .env file and copy the YOCO_SECRET_KEY value
+
+───────────────────────────────────────────────────────────────
+8. VITE_YOCO_PUBLIC_KEY
+───────────────────────────────────────────────────────────────
+Value: [GET FROM YOUR .env FILE - starts with pk_live_]
+
+⚠️ SECURITY: Don't share this key publicly!
+Open your local .env file and copy the VITE_YOCO_PUBLIC_KEY value
+
+═══════════════════════════════════════════════════════════════
+APP URL VARIABLE (1 total)
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+9. VITE_APP_URL
+───────────────────────────────────────────────────────────────
+Value: YOUR NETLIFY SITE URL
+
+⚠️ REPLACE THIS with your actual Netlify URL!
+Find it: Netlify Dashboard → "Site is live at..."
+Example: https://studio-connect-shop.netlify.app
+
+═══════════════════════════════════════════════════════════════
+SUMMARY
+═══════════════════════════════════════════════════════════════
+
+Total variables needed: 9
+
+Supabase (6):
+✓ SUPABASE_URL
+✓ VITE_SUPABASE_URL
+✓ SUPABASE_PROJECT_ID
+✓ VITE_SUPABASE_PROJECT_ID
+✓ SUPABASE_PUBLISHABLE_KEY ← GET THIS FROM SUPABASE!
+✓ VITE_SUPABASE_PUBLISHABLE_KEY ← SAME AS ABOVE!
+
+Yoco (2):
+✓ YOCO_SECRET_KEY
+✓ VITE_YOCO_PUBLIC_KEY
+
+App (1):
+✓ VITE_APP_URL
+
+═══════════════════════════════════════════════════════════════
+WHY YOU NEED BOTH VERSIONS (with and without "VITE_")
+═══════════════════════════════════════════════════════════════
+
+- Variables WITHOUT "VITE_" = Server-side code only
+- Variables WITH "VITE_" = Client-side code (browser)
+
+Your app uses BOTH:
+- Server functions need: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY
+- Browser code needs: VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY
+
+If you're missing either version, parts of your app will break!
+
+═══════════════════════════════════════════════════════════════
+AFTER ADDING ALL VARIABLES
+═══════════════════════════════════════════════════════════════
+
+1. Make sure all 9 are in Netlify
+2. Trigger a new deployment:
+   - Deploys → Trigger deploy → Deploy site
+3. Wait for deployment to finish
+4. Test your site!
+
+═══════════════════════════════════════════════════════════════
+

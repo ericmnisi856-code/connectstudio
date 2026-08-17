@@ -1,0 +1,117 @@
+═══════════════════════════════════════════════════════════════
+         HOW TO GET YOUR SUPABASE PUBLISHABLE KEY
+═══════════════════════════════════════════════════════════════
+
+Your .env file shows: "YOUR_NEW_PUBLISHABLE_KEY_HERE"
+This is a PLACEHOLDER - you need to replace it with your REAL key!
+
+═══════════════════════════════════════════════════════════════
+STEP-BY-STEP INSTRUCTIONS
+═══════════════════════════════════════════════════════════════
+
+1. Open your browser
+2. Go to: https://supabase.com/dashboard
+3. Sign in if needed
+4. You'll see a list of your projects
+5. Click on your project: qccwgssqemkfxkgustuh
+   (or whatever project name you gave it)
+
+6. Look at the LEFT sidebar
+7. Click the GEAR icon ⚙️ (Settings) at the bottom
+8. Click "API" in the settings menu
+
+9. Scroll down to "Project API keys" section
+10. You'll see TWO keys:
+    - service_role key (secret, DON'T USE THIS)
+    - anon public key (this is what you need!)
+
+11. Find the one labeled "anon" "public"
+12. It starts with: eyJ...
+13. Click the COPY button next to it
+
+14. This is your SUPABASE_PUBLISHABLE_KEY!
+
+═══════════════════════════════════════════════════════════════
+NOW ADD IT TO YOUR LOCAL .env FILE
+═══════════════════════════════════════════════════════════════
+
+1. Open your project in VS Code (or any editor)
+2. Open the file: .env
+3. Find these two lines:
+   
+   SUPABASE_PUBLISHABLE_KEY="YOUR_NEW_PUBLISHABLE_KEY_HERE"
+   VITE_SUPABASE_PUBLISHABLE_KEY="YOUR_NEW_PUBLISHABLE_KEY_HERE"
+
+4. Replace BOTH "YOUR_NEW_PUBLISHABLE_KEY_HERE" with the key you copied
+5. It should look like:
+   
+   SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+   VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+6. Save the file
+
+═══════════════════════════════════════════════════════════════
+THEN ADD IT TO NETLIFY
+═══════════════════════════════════════════════════════════════
+
+1. Go to: https://app.netlify.com
+2. Click on your site
+3. Click "Site Settings"
+4. Click "Environment Variables" in the left menu
+5. Click "Add a variable" button
+6. Add these TWO variables with your key:
+
+   Key: SUPABASE_PUBLISHABLE_KEY
+   Value: [paste your key here]
+
+   Key: VITE_SUPABASE_PUBLISHABLE_KEY
+   Value: [paste your key here - same key!]
+
+7. Click "Create variable" for each one
+8. After adding both, go to "Deploys" tab
+9. Click "Trigger deploy" → "Deploy site"
+10. Wait for it to finish
+
+═══════════════════════════════════════════════════════════════
+VERIFY IT WORKS
+═══════════════════════════════════════════════════════════════
+
+1. After deployment finishes, open your site
+2. Try to sign in at: your-site.netlify.app/auth
+3. If it works, you're good!
+4. If you still get "Missing Supabase environment variable" error:
+   - Double-check you added ALL 9 variables from COMPLETE_ENV_VARIABLES.txt
+   - Make sure you deployed AFTER adding the variables
+   - Clear your browser cache and try again
+
+═══════════════════════════════════════════════════════════════
+EXAMPLE OF WHAT THE KEY LOOKS LIKE
+═══════════════════════════════════════════════════════════════
+
+Your key will start with "eyJ" and be VERY long, like:
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjY3dnc3NxZW1rZnhrZ3VzdHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDg3MTU5ODksImV4cCI6MjAyNDI5MTk4OX0.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+(Don't copy this - get YOUR OWN key from Supabase!)
+
+═══════════════════════════════════════════════════════════════
+COMMON MISTAKES
+═══════════════════════════════════════════════════════════════
+
+❌ Using the "service_role" key instead of "anon public" key
+   → Use the ANON PUBLIC key!
+
+❌ Only adding it to ONE variable instead of BOTH
+   → You need BOTH: SUPABASE_PUBLISHABLE_KEY and VITE_SUPABASE_PUBLISHABLE_KEY
+
+❌ Adding to .env but forgetting to add to Netlify
+   → Add it to BOTH places!
+
+❌ Not redeploying after adding variables
+   → You MUST redeploy for changes to take effect!
+
+❌ Copying the key with extra spaces or quotes
+   → Copy ONLY the key itself, no extra characters
+
+═══════════════════════════════════════════════════════════════
+
