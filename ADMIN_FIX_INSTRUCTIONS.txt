@@ -1,0 +1,119 @@
+═══════════════════════════════════════════════════════════════════════════════
+🚨 URGENT: ADMIN ACCESS FIX - DO THIS NOW! 🚨
+═══════════════════════════════════════════════════════════════════════════════
+
+STEP 1: RUN THE SQL SCRIPT IN SUPABASE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Open your Supabase Dashboard: https://supabase.com/dashboard
+
+2. Select your project
+
+3. Click "SQL Editor" in the left sidebar
+
+4. Click "New query" button
+
+5. Open the file: FIX_ADMIN_ACCESS_NOW.sql
+
+6. Copy ALL the contents of that file
+
+7. Paste into the SQL Editor
+
+8. Click "Run" or press Ctrl+Enter
+
+9. Wait for it to complete
+
+10. Check the "Results" panel at the bottom - you should see:
+    ✅ Admin setup verification messages
+    ✅ Count of admin roles for each user
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 2: ENSURE BOTH USERS ARE SIGNED UP
+═══════════════════════════════════════════════════════════════════════════════
+
+BOTH users MUST sign up/sign in for admin access to work:
+
+User 1:
+  Email: ericmnisi856@gmail.com
+  Password: Connectstudio@123
+
+User 2:
+  Email: accounts@connectstudio.co.za
+  Password: Connectstudio@123
+
+If they haven't signed up yet:
+1. Go to your app's /auth page
+2. Sign up with the email and password above
+3. The admin role will be AUTOMATICALLY assigned by the trigger
+
+If they're already signed up but not admin:
+1. Run the SQL script (Step 1 above)
+2. Log out completely
+3. Log back in
+4. Go to /admin page
+5. You should now have full access!
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 3: VERIFY ADMIN ACCESS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Sign in with one of the admin accounts
+2. Navigate to: https://yoursite.com/admin
+3. You should see:
+   ✅ Admin Dashboard heading
+   ✅ Orders tab
+   ✅ Products tab
+   ✅ Sign out button
+   ✅ NO "Admin access required" message
+
+If you still see "Admin access required":
+- Clear browser cache and cookies
+- Sign out completely
+- Sign back in
+- Try again
+
+═══════════════════════════════════════════════════════════════════════════════
+WHAT WAS FIXED:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Created user_roles table with proper structure
+✅ Set up Row Level Security (RLS) policies
+✅ Granted admin role to BOTH email addresses
+✅ Created automatic trigger to assign admin on signup
+✅ Created helper function to check admin status
+✅ Granted all necessary database permissions
+
+═══════════════════════════════════════════════════════════════════════════════
+SUPER ADMIN EMAILS (Hard-coded in the system):
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ericmnisi856@gmail.com
+2. accounts@connectstudio.co.za
+
+These emails will AUTOMATICALLY get admin access when they sign up!
+
+═══════════════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING:
+═══════════════════════════════════════════════════════════════════════════════
+
+Problem: "Admin access required" message still shows
+
+Solutions:
+1. Make sure the SQL script ran successfully in Supabase
+2. Make sure you're signed in with one of the TWO admin emails above
+3. Clear browser cache and cookies
+4. Sign out and sign back in
+5. Check Supabase Authentication tab - verify user exists
+6. Check Supabase Table Editor - look at user_roles table
+7. Verify your user_id has a row with role='admin'
+
+Problem: SQL script shows warnings about users not found
+
+Solution:
+- This means the users haven't signed up yet
+- Have them sign up first, THEN run the script
+- OR: Run the script anyway (the trigger will auto-assign when they sign up)
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 AFTER RUNNING THE SCRIPT, BOTH USERS WILL HAVE FULL ADMIN ACCESS! 🎯
+═══════════════════════════════════════════════════════════════════════════════
