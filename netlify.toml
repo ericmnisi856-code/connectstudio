@@ -1,14 +1,16 @@
 [build]
   command = "npm run build"
   publish = ".output/public"
-  functions = ".output/server"
 
 [build.environment]
   NODE_VERSION = "22"
   NPM_FLAGS = "--legacy-peer-deps"
-  NITRO_PRESET = "netlify"
+  NITRO_PRESET = "netlify-edge"
+
+[functions]
+  directory = ".output/server"
 
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/server"
+  to = "/.netlify/builders/server"
   status = 200
