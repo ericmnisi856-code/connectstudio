@@ -1,0 +1,200 @@
+═══════════════════════════════════════════════════════════════════════════════
+🚨 URGENT: FIX SUPABASE ENVIRONMENT VARIABLES IN NETLIFY 🚨
+═══════════════════════════════════════════════════════════════════════════════
+
+ERROR: Missing Supabase environment variable(s): SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY
+
+CAUSE: The environment variables are not set in Netlify (only in your local .env file)
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 1: GET YOUR SUPABASE CREDENTIALS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Go to: https://supabase.com/dashboard
+
+2. Click on your project
+
+3. Click "Settings" (gear icon in left sidebar)
+
+4. Click "API" in the settings menu
+
+5. You'll see:
+   
+   Project URL: https://qccwgssqemkfxkgustuh.supabase.co
+   
+   anon public key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi...
+   (This is your PUBLISHABLE KEY - it's a LONG string starting with eyJ)
+
+6. **COPY BOTH VALUES** - you'll need them in the next step!
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 2: ADD ENVIRONMENT VARIABLES TO NETLIFY
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Go to: https://app.netlify.com
+
+2. Click on your site (connectstudiosample or whatever it's called)
+
+3. Click "Site settings" (top navigation)
+
+4. Click "Environment variables" (left sidebar under "Build & deploy")
+
+5. Click "Add a variable" button (or "Add environment variables")
+
+6. Add these THREE variables one by one:
+
+   Variable 1:
+   ─────────────────────────────────────────────────────────────────────────
+   Key:   SUPABASE_URL
+   Value: https://qccwgssqemkfxkgustuh.supabase.co
+   
+   Scopes: ✅ All deploys (or select all available scopes)
+   ─────────────────────────────────────────────────────────────────────────
+
+   Variable 2:
+   ─────────────────────────────────────────────────────────────────────────
+   Key:   SUPABASE_PUBLISHABLE_KEY
+   Value: [PASTE YOUR ANON PUBLIC KEY FROM SUPABASE HERE]
+          (The long string starting with eyJ...)
+   
+   Scopes: ✅ All deploys
+   ─────────────────────────────────────────────────────────────────────────
+
+   Variable 3:
+   ─────────────────────────────────────────────────────────────────────────
+   Key:   SUPABASE_PROJECT_ID
+   Value: qccwgssqemkfxkgustuh
+   
+   Scopes: ✅ All deploys
+   ─────────────────────────────────────────────────────────────────────────
+
+7. Click "Save" after adding each variable
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 3: ADD YOCO PAYMENT VARIABLES (ALREADY HAVE THE KEYS)
+═══════════════════════════════════════════════════════════════════════════════
+
+Add these TWO Yoco variables:
+
+   Variable 4:
+   ─────────────────────────────────────────────────────────────────────────
+   Key:   YOCO_SECRET_KEY
+   Value: [YOUR YOCO SECRET KEY - Get from Yoco Dashboard]
+   
+   Scopes: ✅ All deploys
+   ─────────────────────────────────────────────────────────────────────────
+
+   Variable 5:
+   ─────────────────────────────────────────────────────────────────────────
+   Key:   VITE_YOCO_PUBLIC_KEY
+   Value: [YOUR YOCO PUBLIC KEY - Get from Yoco Dashboard]
+   
+   Scopes: ✅ All deploys
+   ─────────────────────────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 4: ADD APP URL VARIABLE
+═══════════════════════════════════════════════════════════════════════════════
+
+   Variable 6:
+   ─────────────────────────────────────────────────────────────────────────
+   Key:   VITE_APP_URL
+   Value: https://your-site-name.netlify.app
+          (Replace with your actual Netlify URL!)
+   
+   Scopes: ✅ All deploys
+   ─────────────────────────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 5: TRIGGER A NEW DEPLOYMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Go to "Deploys" tab (top navigation)
+
+2. Click "Trigger deploy" button
+
+3. Select "Clear cache and deploy site"
+
+4. Wait for the deployment to complete
+
+5. ✅ THE SUPABASE ERROR SHOULD BE GONE!
+
+═══════════════════════════════════════════════════════════════════════════════
+COMPLETE LIST OF ALL ENVIRONMENT VARIABLES YOU NEED IN NETLIFY:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. SUPABASE_URL = https://qccwgssqemkfxkgustuh.supabase.co
+2. SUPABASE_PUBLISHABLE_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (from Supabase)
+3. SUPABASE_PROJECT_ID = qccwgssqemkfxkgustuh
+4. YOCO_SECRET_KEY = [Get from Yoco Dashboard - starts with sk_live_]
+5. VITE_YOCO_PUBLIC_KEY = [Get from Yoco Dashboard - starts with pk_live_]
+6. VITE_APP_URL = https://your-site-name.netlify.app
+
+═══════════════════════════════════════════════════════════════════════════════
+VISUAL GUIDE TO NETLIFY ENVIRONMENT VARIABLES:
+═══════════════════════════════════════════════════════════════════════════════
+
+Netlify Dashboard
+    ↓
+Your Site (click on it)
+    ↓
+Site settings (top tab)
+    ↓
+Environment variables (left sidebar under "Build & deploy")
+    ↓
+Add a variable (or Add environment variables button)
+    ↓
+Enter Key and Value
+    ↓
+Select scopes: ✅ All deploys
+    ↓
+Save
+    ↓
+Repeat for all 6 variables
+    ↓
+Go to Deploys tab
+    ↓
+Trigger deploy → Clear cache and deploy site
+    ↓
+✅ DONE!
+
+═══════════════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING:
+═══════════════════════════════════════════════════════════════════════════════
+
+Problem: "Can't find SUPABASE_PUBLISHABLE_KEY in Supabase dashboard"
+
+Solution:
+- It's called "anon public" key in Supabase
+- Go to: Project Settings → API
+- Look for "Project API keys" section
+- Copy the "anon public" key (the long one starting with eyJ)
+
+Problem: Still getting the error after adding variables
+
+Solution:
+- Make sure you clicked "Save" for each variable
+- Make sure you selected "All deploys" as the scope
+- Clear cache and redeploy (don't just redeploy)
+- Check the deploy log to see if variables are being loaded
+
+Problem: Variables not showing in deploy log
+
+Solution:
+- Variables starting with VITE_ are visible in logs
+- Others (like SUPABASE_URL without VITE_) might not show but are still there
+- Check your Netlify deploy logs for "Environment variables"
+
+═══════════════════════════════════════════════════════════════════════════════
+WHY THIS HAPPENS:
+═══════════════════════════════════════════════════════════════════════════════
+
+- Your LOCAL .env file works fine on your computer
+- But .env files are NOT pushed to GitHub (they're in .gitignore)
+- Netlify builds from GitHub, so it doesn't have your .env file
+- You must manually add environment variables in Netlify dashboard
+- This is a security feature - keeps secrets out of GitHub!
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 AFTER ADDING ALL VARIABLES AND REDEPLOYING, PAYMENTS WILL WORK! 🎯
+═══════════════════════════════════════════════════════════════════════════════

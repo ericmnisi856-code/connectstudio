@@ -1,0 +1,70 @@
+═══════════════════════════════════════════════════════════════════════════════
+📋 HOW TO GET YOUR SUPABASE PUBLISHABLE KEY
+═══════════════════════════════════════════════════════════════════════════════
+
+Your .env file currently has:
+SUPABASE_PUBLISHABLE_KEY="YOUR_NEW_PUBLISHABLE_KEY_HERE"
+
+This is a PLACEHOLDER! You need to replace it with your REAL key.
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 1: GET THE KEY FROM SUPABASE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Go to: https://supabase.com/dashboard
+
+2. Click on your project (qccwgssqemkfxkgustuh)
+
+3. Click "Settings" (gear icon) in the left sidebar
+
+4. Click "API" in the settings submenu
+
+5. Look for "Project API keys" section
+
+6. Find the key labeled: "anon public"
+
+7. It looks like this:
+   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjY3dnc3NxZW1rZnhrZ3VzdHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDg4NjQ4MjgsImV4cCI6MjAyNDQ0MDgyOH0.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+8. Click the "Copy" button next to it
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 2: UPDATE YOUR LOCAL .ENV FILE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Open the .env file in this project
+
+2. Find these two lines:
+   SUPABASE_PUBLISHABLE_KEY="YOUR_NEW_PUBLISHABLE_KEY_HERE"
+   VITE_SUPABASE_PUBLISHABLE_KEY="YOUR_NEW_PUBLISHABLE_KEY_HERE"
+
+3. Replace "YOUR_NEW_PUBLISHABLE_KEY_HERE" with the key you copied
+
+4. It should look like:
+   SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi..."
+   VITE_SUPABASE_PUBLISHABLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOi..."
+
+5. Save the file
+
+6. Restart your dev server if it's running
+
+═══════════════════════════════════════════════════════════════════════════════
+STEP 3: ADD TO NETLIFY (FOR PRODUCTION)
+═══════════════════════════════════════════════════════════════════════════════
+
+See the file: NETLIFY_SUPABASE_FIX.txt for detailed instructions on adding
+environment variables to Netlify.
+
+═══════════════════════════════════════════════════════════════════════════════
+IMPORTANT NOTES:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ The "anon public" key is SAFE to use in frontend code
+✅ It's called "publishable" because it's meant to be public
+✅ The key is protected by Row Level Security (RLS) in Supabase
+✅ You need to add this to BOTH your local .env AND Netlify
+
+❌ DO NOT use the "service_role" key in frontend code
+❌ DO NOT commit the .env file to GitHub (it's already in .gitignore)
+
+═══════════════════════════════════════════════════════════════════════════════
