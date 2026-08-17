@@ -83,6 +83,11 @@ export function YocoHostedPaymentButton({
       onClick={handlePayment}
       disabled={disabled || isLoading}
       className={className}
+      style={{
+        backgroundColor: disabled || isLoading ? '#9ca3af' : '#EA580C',
+        color: '#ffffff',
+        fontWeight: '700',
+      }}
     >
       {isLoading ? (
         <>
