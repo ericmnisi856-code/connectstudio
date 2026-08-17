@@ -295,7 +295,7 @@ function CheckoutFormPage() {
                   }}
                   onInitiated={handlePaymentInitiated}
                   disabled={isProcessingOrder || !hasFilledRequiredFields}
-                  className="w-full bg-orange-gradient text-primary-foreground hover:opacity-90"
+                  className="w-full bg-orange-gradient text-white font-semibold hover:opacity-90 shadow-lg"
                 />
                 
                 <p className="mt-3 text-xs text-muted-foreground text-center">
