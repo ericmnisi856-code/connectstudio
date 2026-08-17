@@ -1,0 +1,81 @@
+═══════════════════════════════════════════════════════════════════════════════
+🚨 URGENT: FIX NETLIFY ENVIRONMENT VARIABLES NOW! 🚨
+═══════════════════════════════════════════════════════════════════════════════
+
+YOUR DEPLOYMENT IS FAILING BECAUSE NETLIFY CAN'T FIND ENVIRONMENT VARIABLES!
+
+ERROR: Secret env var "SUPABASE_URL"'s value detected
+ERROR: Secrets scanning found 2 instance(s) of secrets in build output
+
+═══════════════════════════════════════════════════════════════════════════════
+QUICK FIX - DO THIS RIGHT NOW:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Go to: https://app.netlify.com
+
+2. Click on your site
+
+3. Site settings → Environment variables
+
+4. Add these 6 variables (click "Add a variable" for each):
+
+   ✅ SUPABASE_URL
+      Value: https://qccwgssqemkfxkgustuh.supabase.co
+      Scope: All deploys
+
+   ✅ SUPABASE_PUBLISHABLE_KEY
+      Value: [GET FROM SUPABASE - See instructions below]
+      Scope: All deploys
+
+   ✅ SUPABASE_PROJECT_ID
+      Value: qccwgssqemkfxkgustuh
+      Scope: All deploys
+
+   ✅ YOCO_SECRET_KEY
+      Value: [COPY FROM YOUR LOCAL .env FILE]
+      Scope: All deploys
+
+   ✅ VITE_YOCO_PUBLIC_KEY
+      Value: [COPY FROM YOUR LOCAL .env FILE]
+      Scope: All deploys
+
+   ✅ VITE_APP_URL
+      Value: https://YOUR-SITE-NAME.netlify.app
+      Scope: All deploys
+
+5. Click "Save" after each one
+
+6. Go to Deploys tab → Trigger deploy → Clear cache and deploy site
+
+═══════════════════════════════════════════════════════════════════════════════
+HOW TO GET SUPABASE_PUBLISHABLE_KEY:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. https://supabase.com/dashboard
+2. Click your project
+3. Settings (gear icon) → API
+4. Copy "anon public" key (the long one starting with eyJ...)
+5. Paste as SUPABASE_PUBLISHABLE_KEY in Netlify
+
+═══════════════════════════════════════════════════════════════════════════════
+WHY THIS IS HAPPENING:
+═══════════════════════════════════════════════════════════════════════════════
+
+❌ Your .env file is NOT pushed to GitHub (it's in .gitignore - this is good!)
+❌ Netlify builds from GitHub, so it doesn't have your .env file
+✅ You MUST manually add environment variables in Netlify dashboard
+✅ This is a security best practice - keeps secrets out of GitHub
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER YOU ADD ALL 6 VARIABLES:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ The "secrets found" error will disappear
+✅ Your app will connect to Supabase correctly
+✅ Payments will work
+✅ Admin dashboard will work
+✅ Authentication will work
+
+═══════════════════════════════════════════════════════════════════════════════
+🎯 THIS IS THE ONLY WAY TO FIX IT - ADD VARIABLES TO NETLIFY! 🎯
+═══════════════════════════════════════════════════════════════════════════════
