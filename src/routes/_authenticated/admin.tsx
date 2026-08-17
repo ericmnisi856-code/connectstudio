@@ -13,6 +13,7 @@ import {
 } from "@/components/admin/admin-dashboard";
 import { ProductManagement } from "@/components/admin/product-management";
 import { getIsAdmin, listOrders, updateOrderStatus } from "@/lib/orders.functions";
+import { getProducts, createProduct, updateProduct, deleteProduct } from "@/lib/products.functions";
 import { products, type Product } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,14 +44,21 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const fetchIsAdmin = useServerFn(getIsAdmin);
   const fetchOrders = useServerFn(listOrders);
+  const fetchProducts = useServerFn(getProducts);
   const setStatus = useServerFn(updateOrderStatus);
-
-  const [localProducts, setLocalProducts] = React.useState<Product[]>(products);
+  const addProduct = useServerFn(createProduct);
+  const editProduct = useServerFn(updateProduct);
+  const removeProduct = useServerFn(deleteProduct);
 
   const adminQuery = useQuery({ queryKey: ["is-admin"], queryFn: () => fetchIsAdmin() });
   const ordersQuery = useQuery({
     queryKey: ["orders"],
     queryFn: () => fetchOrders(),
+    enabled: adminQuery.data?.isAdmin === true,
+  });
+  const productsQuery = useQuery({
+    queryKey: ["products"],
+    queryFn: () => fetchProducts(),
     enabled: adminQuery.data?.isAdmin === true,
   });
 
@@ -64,23 +72,21 @@ function AdminPage() {
   }
 
   async function handleProductCreate(product: any) {
-    // In a real app, this would call an API
-    setLocalProducts([...localProducts, product as Product]);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await addProduct({ data: product });
+    // Refetch products to update the list
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   }
 
-  async function handleProductUpdate(slug: string, product: any) {
-    // In a real app, this would call an API
-    setLocalProducts(
-      localProducts.map((p) => (p.slug === slug ? { ...product, slug } as Product : p))
-    );
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  async function handleProductUpdate(id: string, product: any) {
+    await editProduct({ data: { id, updates: product } });
+    // Refetch products to update the list
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   }
 
-  async function handleProductDelete(slug: string) {
-    // In a real app, this would call an API
-    setLocalProducts(localProducts.filter((p) => p.slug !== slug));
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  async function handleProductDelete(id: string) {
+    await removeProduct({ data: { id } });
+    // Refetch products to update the list
+    await queryClient.invalidateQueries({ queryKey: ["products"] });
   }
 
   if (adminQuery.isLoading) {
@@ -143,7 +149,7 @@ function AdminPage() {
 
         <TabsContent value="products" className="mt-6">
           <ProductManagement
-            products={localProducts}
+            products={productsQuery.data ?? []}
             onProductCreate={handleProductCreate}
             onProductUpdate={handleProductUpdate}
             onProductDelete={handleProductDelete}

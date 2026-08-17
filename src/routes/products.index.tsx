@@ -1,11 +1,15 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { Search, SlidersHorizontal, Sparkles, Truck, ShieldCheck, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Search, SlidersHorizontal, Sparkles, Truck, ShieldCheck, Zap, Loader2 } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/product-card";
-import { categories, products, type Category } from "@/lib/catalog";
+import { categories, type Category } from "@/lib/catalog";
+import { getProducts } from "@/lib/products.functions";
+import { supabase } from "@/integrations/supabase/client";
 import type { ProductSearch } from "./products";
 import { cn } from "@/lib/utils";
 
@@ -38,23 +42,55 @@ function ProductsPage() {
   const { category, sort = "featured", q = "" } = useSearch({ from: "/products" });
   const navigate = useNavigate({ from: "/products/" });
   const [query, setQuery] = React.useState(q);
+  const fetchProducts = useServerFn(getProducts);
+
+  // Fetch products from Supabase
+  const { data: products = [], isLoading, refetch } = useQuery({
+    queryKey: ["products"],
+    queryFn: () => fetchProducts(),
+    staleTime: 1000, // Consider data stale after 1 second for real-time feel
+  });
+
+  // Set up real-time subscription for product changes
+  React.useEffect(() => {
+    const channel = supabase
+      .channel("products-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*", // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: "public",
+          table: "products",
+        },
+        (payload) => {
+          console.log("[Products] Real-time update:", payload);
+          // Refetch products when any change occurs
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch]);
 
   React.useEffect(() => setQuery(q), [q]);
 
   const list = React.useMemo(() => {
-    let items = products.filter((p) => (category ? p.category === category : true));
+    let items = products.filter((p: any) => (category ? p.category === category : true));
     if (query.trim()) {
       const needle = query.trim().toLowerCase();
-      items = items.filter((p) =>
-        [p.name, p.model, p.tagline, ...p.useCases].join(" ").toLowerCase().includes(needle),
+      items = items.filter((p: any) =>
+        [p.name, p.model, p.description || ""].join(" ").toLowerCase().includes(needle),
       );
     }
     const sorted = [...items];
-    if (sort === "price-asc") sorted.sort((a, b) => a.price - b.price);
-    if (sort === "price-desc") sorted.sort((a, b) => b.price - a.price);
-    if (sort === "rating") sorted.sort((a, b) => b.rating - a.rating);
+    if (sort === "price-asc") sorted.sort((a: any, b: any) => a.price - b.price);
+    if (sort === "price-desc") sorted.sort((a: any, b: any) => b.price - a.price);
+    // Rating sorting removed since we don't have rating field yet
     return sorted;
-  }, [category, query, sort]);
+  }, [products, category, query, sort]);
 
   const active = categories.find((c) => c.id === category);
   const marquee = [...products, ...products];
@@ -194,7 +230,11 @@ function ProductsPage() {
           {products.length} products
         </p>
 
-        {list.length === 0 ? (
+        {isLoading ? (
+          <div className="mt-16 flex justify-center">
+            <Loader2 className="size-8 animate-spin text-primary" />
+          </div>
+        ) : list.length === 0 ? (
           <div className="rise-in mt-16 rounded-2xl border border-dashed border-border p-16 text-center">
             <h2 className="text-lg font-semibold">No matches</h2>
             <p className="mt-2 text-sm text-muted-foreground">
