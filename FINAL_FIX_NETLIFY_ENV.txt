@@ -1,0 +1,90 @@
+═══════════════════════════════════════════════════════════════════════════════
+🚨 FINAL FIX - NETLIFY ENVIRONMENT VARIABLES 🚨
+═══════════════════════════════════════════════════════════════════════════════
+
+THE PROBLEM:
+Your app needs VITE_ prefixed variables for client-side code!
+You only added SUPABASE_URL but the client needs VITE_SUPABASE_URL!
+
+═══════════════════════════════════════════════════════════════════════════════
+GO TO NETLIFY AND ADD THESE EXACT VARIABLES:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. https://app.netlify.com
+2. Click your site
+3. Site settings → Environment variables
+4. Add THESE 8 VARIABLES (you might have some already, add the missing ones):
+
+✅ VARIABLE 1:
+   Key: VITE_SUPABASE_URL
+   Value: https://qccwgssqemkfxkgustuh.supabase.co
+   Scope: All deploys
+
+✅ VARIABLE 2:
+   Key: VITE_SUPABASE_PUBLISHABLE_KEY
+   Value: [GET FROM SUPABASE - anon public key]
+   Scope: All deploys
+
+✅ VARIABLE 3:
+   Key: VITE_SUPABASE_PROJECT_ID
+   Value: qccwgssqemkfxkgustuh
+   Scope: All deploys
+
+✅ VARIABLE 4:
+   Key: SUPABASE_URL
+   Value: https://qccwgssqemkfxkgustuh.supabase.co
+   Scope: All deploys
+
+✅ VARIABLE 5:
+   Key: SUPABASE_PUBLISHABLE_KEY
+   Value: [SAME AS VARIABLE 2]
+   Scope: All deploys
+
+✅ VARIABLE 6:
+   Key: SUPABASE_PROJECT_ID
+   Value: qccwgssqemkfxkgustuh
+   Scope: All deploys
+
+✅ VARIABLE 7:
+   Key: VITE_YOCO_PUBLIC_KEY
+   Value: [YOUR YOCO PUBLIC KEY]
+   Scope: All deploys
+
+✅ VARIABLE 8:
+   Key: YOCO_SECRET_KEY
+   Value: [YOUR YOCO SECRET KEY]
+   Scope: All deploys
+
+✅ VARIABLE 9:
+   Key: VITE_APP_URL
+   Value: https://connectstudiosample.netlify.app (or your actual URL)
+   Scope: All deploys
+
+═══════════════════════════════════════════════════════════════════════════════
+HOW TO GET SUPABASE_PUBLISHABLE_KEY:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. https://supabase.com/dashboard
+2. Click your project
+3. Settings → API
+4. Copy "anon public" key (long string starting with eyJ...)
+5. Use this for BOTH Variable 2 AND Variable 5
+
+═══════════════════════════════════════════════════════════════════════════════
+AFTER ADDING ALL 9 VARIABLES:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Deploys tab
+2. Trigger deploy → Deploy site (regular deploy, not clear cache)
+3. Wait for build to complete
+4. ✅ THE ERROR WILL BE GONE!
+
+═══════════════════════════════════════════════════════════════════════════════
+WHY YOU NEED BOTH VERSIONS:
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ VITE_ prefix = Used in client-side (browser) code
+✅ No prefix = Used in server-side code
+✅ Your app uses BOTH, so you need BOTH versions!
+
+═══════════════════════════════════════════════════════════════════════════════
