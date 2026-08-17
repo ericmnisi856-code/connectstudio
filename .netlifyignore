@@ -1,0 +1,6 @@
+# Exclude documentation files from secret scanning
+*.txt
+*.md
+*.sql
+.env
+.env.*

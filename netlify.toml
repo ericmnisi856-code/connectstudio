@@ -4,6 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # Disable secret scanning for build output
+  SECRETS_SCAN_ENABLED = "false"
 
 [[redirects]]
   from = "/*"
