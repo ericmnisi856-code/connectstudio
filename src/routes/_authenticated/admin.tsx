@@ -73,8 +73,26 @@ function AdminPage() {
 
   async function handleProductCreate(product: any) {
     try {
-      await addProduct({ data: product });
+      console.log("Sending product data:", product);
+      
+      // Direct API call bypassing TanStack validation
+      const response = await fetch('/.netlify/functions/create-product-direct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(product)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
       await queryClient.invalidateQueries({ queryKey: ["products"] });
+      
+      return result;
     } catch (error) {
       console.error("Create product error:", error);
       throw error;
