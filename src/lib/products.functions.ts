@@ -10,12 +10,12 @@ const productSchema = z.object({
   tagline: z.string().min(1),
   description: z.string().min(1),
   price: z.number().min(0),
-  compareAt: z.number().min(0).optional(),
+  compareAt: z.number().min(0).optional().nullable(),
   stock: z.number().int().min(0),
   rating: z.number().min(0).max(5),
   reviews: z.number().int().min(0),
-  badge: z.string().optional(),
-  image: z.string().optional(),
+  badge: z.string().optional().nullable(),
+  image: z.string().optional().nullable(),
   highlights: z.array(z.string()),
   specs: z.array(z.object({
     label: z.string(),
@@ -97,8 +97,25 @@ export const createProduct = createServerFn({ method: "POST" })
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Transform from camelCase to snake_case
-    const dbData = toSnakeCase(data);
+    // Create database object with snake_case field names manually
+    const dbData = {
+      slug: data.slug,
+      name: data.name,
+      model: data.model,
+      category: data.category,
+      tagline: data.tagline,
+      description: data.description,
+      price: data.price,
+      compare_at: data.compareAt,
+      stock: data.stock,
+      rating: data.rating,
+      reviews: data.reviews,
+      badge: data.badge,
+      image: data.image,
+      highlights: data.highlights,
+      specs: data.specs,
+      use_cases: data.useCases,
+    };
 
     const { data: product, error } = await supabase
       .from("products")
@@ -132,8 +149,24 @@ export const updateProduct = createServerFn({ method: "POST" })
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Transform from camelCase to snake_case
-    const dbUpdates = toSnakeCase(data.updates);
+    // Create database object with snake_case field names manually
+    const dbUpdates: any = {};
+    if (data.updates.slug !== undefined) dbUpdates.slug = data.updates.slug;
+    if (data.updates.name !== undefined) dbUpdates.name = data.updates.name;
+    if (data.updates.model !== undefined) dbUpdates.model = data.updates.model;
+    if (data.updates.category !== undefined) dbUpdates.category = data.updates.category;
+    if (data.updates.tagline !== undefined) dbUpdates.tagline = data.updates.tagline;
+    if (data.updates.description !== undefined) dbUpdates.description = data.updates.description;
+    if (data.updates.price !== undefined) dbUpdates.price = data.updates.price;
+    if (data.updates.compareAt !== undefined) dbUpdates.compare_at = data.updates.compareAt;
+    if (data.updates.stock !== undefined) dbUpdates.stock = data.updates.stock;
+    if (data.updates.rating !== undefined) dbUpdates.rating = data.updates.rating;
+    if (data.updates.reviews !== undefined) dbUpdates.reviews = data.updates.reviews;
+    if (data.updates.badge !== undefined) dbUpdates.badge = data.updates.badge;
+    if (data.updates.image !== undefined) dbUpdates.image = data.updates.image;
+    if (data.updates.highlights !== undefined) dbUpdates.highlights = data.updates.highlights;
+    if (data.updates.specs !== undefined) dbUpdates.specs = data.updates.specs;
+    if (data.updates.useCases !== undefined) dbUpdates.use_cases = data.updates.useCases;
 
     const { data: product, error } = await supabase
       .from("products")
