@@ -12,6 +12,7 @@ import {
   type Order,
 } from "@/components/admin/admin-dashboard";
 import { ProductManagement } from "@/components/admin/product-management";
+import { SimpleProductAdder } from "@/components/admin/simple-product-adder";
 import { getIsAdmin, listOrders, updateOrderStatus } from "@/lib/orders.functions";
 import { getProducts, createProductNew, updateProduct, deleteProduct } from "@/lib/products.functions";
 import { products, type Product } from "@/lib/catalog";
@@ -188,12 +189,17 @@ function AdminPage() {
         </TabsContent>
 
         <TabsContent value="products" className="mt-6">
-          <ProductManagement
-            products={productsQuery.data ?? []}
-            onProductCreate={handleProductCreate}
-            onProductUpdate={handleProductUpdate}
-            onProductDelete={handleProductDelete}
-          />
+          <div className="space-y-8">
+            <SimpleProductAdder 
+              onProductAdded={() => queryClient.invalidateQueries({ queryKey: ["products"] })}
+            />
+            <ProductManagement
+              products={productsQuery.data ?? []}
+              onProductCreate={handleProductCreate}
+              onProductUpdate={handleProductUpdate}
+              onProductDelete={handleProductDelete}
+            />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

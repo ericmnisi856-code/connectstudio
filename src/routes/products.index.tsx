@@ -7,7 +7,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/product-card";
-import { categories, type Category } from "@/lib/catalog";
+import { categories, products as hardcodedProducts, type Category } from "@/lib/catalog";
 import { getProducts } from "@/lib/products.functions";
 import { supabase } from "@/integrations/supabase/client";
 import type { ProductSearch } from "./products";
@@ -44,12 +44,23 @@ function ProductsPage() {
   const [query, setQuery] = React.useState(q);
   const fetchProducts = useServerFn(getProducts);
 
-  // Fetch products from Supabase
-  const { data: products = [], isLoading, refetch } = useQuery({
+  // Fetch products from Supabase with fallback to hardcoded catalog
+  const { data: dbProducts = [], isLoading, refetch } = useQuery({
     queryKey: ["products"],
     queryFn: () => fetchProducts(),
     staleTime: 1000, // Consider data stale after 1 second for real-time feel
   });
+
+  // Use database products if available, otherwise fall back to hardcoded catalog
+  const products = React.useMemo(() => {
+    if (dbProducts.length > 0) {
+      console.log("[Products] Using database products:", dbProducts.length);
+      return dbProducts;
+    } else {
+      console.log("[Products] Using hardcoded catalog:", hardcodedProducts.length);
+      return hardcodedProducts;
+    }
+  }, [dbProducts]);
 
   // Set up real-time subscription for product changes
   React.useEffect(() => {
