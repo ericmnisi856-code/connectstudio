@@ -7,14 +7,44 @@ const productSchema = z.object({
   name: z.string().min(1),
   model: z.string().min(1),
   category: z.string().min(1),
+  tagline: z.string().min(1),
+  description: z.string().min(1),
   price: z.number().min(0),
+  compareAt: z.number().min(0).optional(),
   stock: z.number().int().min(0),
-  description: z.string().optional(),
-  features: z.array(z.string()).optional(),
-  specs: z.record(z.string()).optional(),
+  rating: z.number().min(0).max(5),
+  reviews: z.number().int().min(0),
+  badge: z.string().optional(),
+  image: z.string().optional(),
+  highlights: z.array(z.string()),
+  specs: z.array(z.object({
+    label: z.string(),
+    value: z.string(),
+  })),
+  useCases: z.array(z.string()),
 });
 
 type Product = z.infer<typeof productSchema> & { id?: string };
+
+// Transform camelCase to snake_case for database
+function toSnakeCase(obj: any): any {
+  const result: any = {};
+  for (const key in obj) {
+    const snakeKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+    result[snakeKey] = obj[key];
+  }
+  return result;
+}
+
+// Transform snake_case to camelCase from database
+function toCamelCase(obj: any): any {
+  const result: any = {};
+  for (const key in obj) {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    result[camelKey] = obj[key];
+  }
+  return result;
+}
 
 /**
  * Get all products from Supabase
@@ -40,7 +70,8 @@ export const getProducts = createServerFn({ method: "GET" })
       throw new Error("Failed to fetch products");
     }
 
-    return data || [];
+    // Transform from snake_case to camelCase
+    return (data || []).map((product: any) => toCamelCase(product));
   });
 
 /**
@@ -58,9 +89,12 @@ export const createProduct = createServerFn({ method: "POST" })
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Transform from camelCase to snake_case
+    const dbData = toSnakeCase(data);
+
     const { data: product, error } = await supabase
       .from("products")
-      .insert([data])
+      .insert([dbData])
       .select()
       .single();
 
@@ -69,7 +103,7 @@ export const createProduct = createServerFn({ method: "POST" })
       throw new Error("Failed to create product");
     }
 
-    return product;
+    return toCamelCase(product);
   });
 
 /**
@@ -90,9 +124,12 @@ export const updateProduct = createServerFn({ method: "POST" })
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Transform from camelCase to snake_case
+    const dbUpdates = toSnakeCase(data.updates);
+
     const { data: product, error } = await supabase
       .from("products")
-      .update(data.updates)
+      .update(dbUpdates)
       .eq("id", data.id)
       .select()
       .single();
@@ -102,7 +139,7 @@ export const updateProduct = createServerFn({ method: "POST" })
       throw new Error("Failed to update product");
     }
 
-    return product;
+    return toCamelCase(product);
   });
 
 /**

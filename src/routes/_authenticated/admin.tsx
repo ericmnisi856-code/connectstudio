@@ -72,21 +72,43 @@ function AdminPage() {
   }
 
   async function handleProductCreate(product: any) {
-    await addProduct({ data: product });
-    // Refetch products to update the list
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
+    try {
+      await addProduct({ data: product });
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+    } catch (error) {
+      console.error("Create product error:", error);
+      throw error;
+    }
   }
 
-  async function handleProductUpdate(id: string, product: any) {
-    await editProduct({ data: { id, updates: product } });
-    // Refetch products to update the list
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
+  async function handleProductUpdate(slug: string, product: any) {
+    try {
+      // Find product by slug to get its ID
+      const productToUpdate = productsQuery.data?.find((p: any) => p.slug === slug);
+      if (!productToUpdate?.id) {
+        throw new Error("Product not found");
+      }
+      await editProduct({ data: { id: productToUpdate.id, updates: product } });
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+    } catch (error) {
+      console.error("Update product error:", error);
+      throw error;
+    }
   }
 
-  async function handleProductDelete(id: string) {
-    await removeProduct({ data: { id } });
-    // Refetch products to update the list
-    await queryClient.invalidateQueries({ queryKey: ["products"] });
+  async function handleProductDelete(slug: string) {
+    try {
+      // Find product by slug to get its ID
+      const productToDelete = productsQuery.data?.find((p: any) => p.slug === slug);
+      if (!productToDelete?.id) {
+        throw new Error("Product not found");
+      }
+      await removeProduct({ data: { id: productToDelete.id } });
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+    } catch (error) {
+      console.error("Delete product error:", error);
+      throw error;
+    }
   }
 
   if (adminQuery.isLoading) {
