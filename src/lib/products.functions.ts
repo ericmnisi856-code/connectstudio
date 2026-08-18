@@ -16,12 +16,12 @@ const productSchema = z.object({
   reviews: z.number().int().min(0),
   badge: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
-  highlights: z.array(z.string()),
+  highlights: z.array(z.string()).default([]),
   specs: z.array(z.object({
     label: z.string(),
     value: z.string(),
-  })),
-  useCases: z.array(z.string()),
+  })).default([]),
+  useCases: z.array(z.string()).default([]),
 });
 
 type Product = z.infer<typeof productSchema> & { id?: string };
@@ -86,7 +86,17 @@ export const getProducts = createServerFn({ method: "GET" })
  * Create a new product (admin only)
  */
 export const createProduct = createServerFn({ method: "POST" })
-  .validator(productSchema)
+  .validator((rawData) => {
+    console.log("[Products] Raw data received:", JSON.stringify(rawData, null, 2));
+    try {
+      const result = productSchema.parse(rawData);
+      console.log("[Products] Validation passed:", JSON.stringify(result, null, 2));
+      return result;
+    } catch (error) {
+      console.error("[Products] Validation failed:", error);
+      throw error;
+    }
+  })
   .handler(async ({ data }) => {
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
@@ -96,6 +106,8 @@ export const createProduct = createServerFn({ method: "POST" })
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    console.log("[Products] Creating product with data:", JSON.stringify(data, null, 2));
 
     // Create database object with snake_case field names manually
     const dbData = {
@@ -117,6 +129,8 @@ export const createProduct = createServerFn({ method: "POST" })
       use_cases: data.useCases,
     };
 
+    console.log("[Products] DB data:", JSON.stringify(dbData, null, 2));
+
     const { data: product, error } = await supabase
       .from("products")
       .insert([dbData])
@@ -125,7 +139,7 @@ export const createProduct = createServerFn({ method: "POST" })
 
     if (error) {
       console.error("[Products] Create error:", error);
-      throw new Error("Failed to create product");
+      throw new Error("Failed to create product: " + error.message);
     }
 
     return toCamelCase(product);
