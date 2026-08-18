@@ -265,6 +265,10 @@ function ProductForm({
       image: imagePreview || undefined,
     };
 
+    console.log("FORM DEBUG - About to submit:", JSON.stringify(data, null, 2));
+    console.log("FORM DEBUG - specs type:", Array.isArray(data.specs) ? "array" : typeof data.specs);
+    console.log("FORM DEBUG - specs value:", data.specs);
+
     onSubmit(data);
   }
 
