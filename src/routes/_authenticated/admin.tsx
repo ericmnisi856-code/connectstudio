@@ -13,7 +13,7 @@ import {
 } from "@/components/admin/admin-dashboard";
 import { ProductManagement } from "@/components/admin/product-management";
 import { getIsAdmin, listOrders, updateOrderStatus } from "@/lib/orders.functions";
-import { getProducts, createProduct, updateProduct, deleteProduct } from "@/lib/products.functions";
+import { getProducts, createProductNew, updateProduct, deleteProduct } from "@/lib/products.functions";
 import { products, type Product } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -46,7 +46,7 @@ function AdminPage() {
   const fetchOrders = useServerFn(listOrders);
   const fetchProducts = useServerFn(getProducts);
   const setStatus = useServerFn(updateOrderStatus);
-  const addProduct = useServerFn(createProduct);
+  const addProduct = useServerFn(createProductNew);
   const editProduct = useServerFn(updateProduct);
   const removeProduct = useServerFn(deleteProduct);
 

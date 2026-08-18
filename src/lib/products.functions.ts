@@ -58,77 +58,84 @@ export const getProducts = createServerFn({ method: "GET" })
   });
 
 /**
- * Create a new product (admin only)
+ * Create a new product (admin only) - NO VALIDATION VERSION
  */
-export const createProduct = createServerFn({ method: "POST" })
+export const createProductNew = createServerFn({ method: "POST" })
   .handler(async (ctx) => {
-    const rawData = await ctx.request.json();
-    console.log("[Products] Raw data received:", JSON.stringify(rawData, null, 2));
-    
-    // Extract data from wrapper if present
-    const data = rawData.data || rawData;
-    console.log("[Products] Extracted data:", JSON.stringify(data, null, 2));
+    try {
+      const rawData = await ctx.request.json();
+      console.log("[Products] Raw request data:", JSON.stringify(rawData, null, 2));
+      
+      // Extract data from wrapper if present
+      const data = rawData.data || rawData;
+      console.log("[Products] Extracted product data:", JSON.stringify(data, null, 2));
 
-    const supabaseUrl = process.env["SUPABASE_URL"];
-    const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
+      const supabaseUrl = process.env["SUPABASE_URL"];
+      const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
 
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Missing Supabase credentials");
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error("Missing Supabase credentials");
+      }
+
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      // Ensure arrays are arrays, not objects
+      let specs = [];
+      let useCases = [];
+      let highlights = [];
+
+      if (data.specs && Array.isArray(data.specs)) {
+        specs = data.specs.filter(s => s && s.label && s.value);
+      }
+      
+      if (data.useCases && Array.isArray(data.useCases)) {
+        useCases = data.useCases.filter(u => u && u.trim());
+      }
+      
+      if (data.highlights && Array.isArray(data.highlights)) {
+        highlights = data.highlights.filter(h => h && h.trim());
+      }
+
+      // Create database object with snake_case field names
+      const dbData = {
+        slug: String(data.slug || ''),
+        name: String(data.name || ''),
+        model: String(data.model || ''),
+        category: String(data.category || ''),
+        tagline: String(data.tagline || ''),
+        description: String(data.description || ''),
+        price: Number(data.price) || 0,
+        compare_at: data.compareAt ? Number(data.compareAt) : null,
+        stock: Number(data.stock) || 0,
+        rating: Number(data.rating) || 0,
+        reviews: Number(data.reviews) || 0,
+        badge: data.badge || null,
+        image: data.image || null,
+        highlights: highlights,
+        specs: specs,
+        use_cases: useCases,
+      };
+
+      console.log("[Products] Final DB data:", JSON.stringify(dbData, null, 2));
+
+      const { data: product, error } = await supabase
+        .from("products")
+        .insert([dbData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error("[Products] Database error:", error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      console.log("[Products] Success! Created product:", product);
+      return toCamelCase(product);
+      
+    } catch (error) {
+      console.error("[Products] Handler error:", error);
+      throw error;
     }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Ensure specs and useCases are arrays
-    let specs = data.specs || [];
-    let useCases = data.useCases || [];
-    
-    // If specs is an object, convert to empty array
-    if (specs && !Array.isArray(specs)) {
-      console.log("[Products] Converting specs from object to array");
-      specs = [];
-    }
-    
-    // If useCases is an object, convert to empty array
-    if (useCases && !Array.isArray(useCases)) {
-      console.log("[Products] Converting useCases from object to array");
-      useCases = [];
-    }
-
-    // Create database object with snake_case field names manually
-    const dbData = {
-      slug: data.slug,
-      name: data.name,
-      model: data.model,
-      category: data.category,
-      tagline: data.tagline,
-      description: data.description,
-      price: Number(data.price),
-      compare_at: data.compareAt ? Number(data.compareAt) : null,
-      stock: Number(data.stock),
-      rating: Number(data.rating),
-      reviews: Number(data.reviews),
-      badge: data.badge || null,
-      image: data.image || null,
-      highlights: Array.isArray(data.highlights) ? data.highlights : [],
-      specs: specs,
-      use_cases: useCases,
-    };
-
-    console.log("[Products] DB data to insert:", JSON.stringify(dbData, null, 2));
-
-    const { data: product, error } = await supabase
-      .from("products")
-      .insert([dbData])
-      .select()
-      .single();
-
-    if (error) {
-      console.error("[Products] Create error:", error);
-      throw new Error("Failed to create product: " + error.message);
-    }
-
-    console.log("[Products] Product created successfully:", product);
-    return toCamelCase(product);
   });
 
 /**
