@@ -90,11 +90,13 @@ export const getProducts = createServerFn({ method: "GET" })
  * Create a new product (admin only)
  */
 export const createProduct = createServerFn({ method: "POST" })
-  .validator(z.object({
-    data: productSchema,
-  }))
-  .handler(async ({ data: { data } }) => {
-    console.log("[Products] Validated data received:", JSON.stringify(data, null, 2));
+  .handler(async (ctx) => {
+    const rawData = await ctx.request.json();
+    console.log("[Products] Raw data received:", JSON.stringify(rawData, null, 2));
+    
+    // Extract data from wrapper if present
+    const data = rawData.data || rawData;
+    console.log("[Products] Extracted data:", JSON.stringify(data, null, 2));
 
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
@@ -105,6 +107,22 @@ export const createProduct = createServerFn({ method: "POST" })
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Ensure specs and useCases are arrays
+    let specs = data.specs || [];
+    let useCases = data.useCases || [];
+    
+    // If specs is an object, convert to empty array
+    if (specs && !Array.isArray(specs)) {
+      console.log("[Products] Converting specs from object to array");
+      specs = [];
+    }
+    
+    // If useCases is an object, convert to empty array
+    if (useCases && !Array.isArray(useCases)) {
+      console.log("[Products] Converting useCases from object to array");
+      useCases = [];
+    }
+
     // Create database object with snake_case field names manually
     const dbData = {
       slug: data.slug,
@@ -113,16 +131,16 @@ export const createProduct = createServerFn({ method: "POST" })
       category: data.category,
       tagline: data.tagline,
       description: data.description,
-      price: data.price,
-      compare_at: data.compareAt || null,
-      stock: data.stock,
-      rating: data.rating,
-      reviews: data.reviews,
+      price: Number(data.price),
+      compare_at: data.compareAt ? Number(data.compareAt) : null,
+      stock: Number(data.stock),
+      rating: Number(data.rating),
+      reviews: Number(data.reviews),
       badge: data.badge || null,
       image: data.image || null,
-      highlights: data.highlights || [],
-      specs: data.specs || [],
-      use_cases: data.useCases || [],
+      highlights: Array.isArray(data.highlights) ? data.highlights : [],
+      specs: specs,
+      use_cases: useCases,
     };
 
     console.log("[Products] DB data to insert:", JSON.stringify(dbData, null, 2));
