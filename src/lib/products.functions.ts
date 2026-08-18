@@ -1,34 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
-import { z } from "zod";
-
-const productSchema = z.object({
-  slug: z.string().min(1),
-  name: z.string().min(1),
-  model: z.string().min(1),
-  category: z.string().min(1),
-  tagline: z.string().min(1),
-  description: z.string().min(1),
-  price: z.number().min(0),
-  compareAt: z.union([z.number().min(0), z.string(), z.null(), z.undefined()]).optional().transform(val => {
-    if (!val || val === '') return undefined;
-    if (typeof val === 'string') return Number(val);
-    return val;
-  }),
-  stock: z.number().int().min(0),
-  rating: z.number().min(0).max(5),
-  reviews: z.number().int().min(0),
-  badge: z.union([z.string(), z.null(), z.undefined()]).optional().transform(val => val === '' ? undefined : val),
-  image: z.union([z.string(), z.null(), z.undefined()]).optional().transform(val => val === '' ? undefined : val),
-  highlights: z.array(z.string()).default([]),
-  specs: z.array(z.object({
-    label: z.string(),
-    value: z.string(),
-  })).default([]),
-  useCases: z.array(z.string()).default([]),
-});
-
-type Product = z.infer<typeof productSchema> & { id?: string };
 
 // Transform camelCase to snake_case for database
 function toSnakeCase(obj: any): any {
@@ -164,11 +135,10 @@ export const createProduct = createServerFn({ method: "POST" })
  * Update an existing product (admin only)
  */
 export const updateProduct = createServerFn({ method: "POST" })
-  .validator(z.object({
-    id: z.string().uuid(),
-    updates: productSchema.partial(),
-  }))
-  .handler(async ({ data }) => {
+  .handler(async (ctx) => {
+    const rawData = await ctx.request.json();
+    const { id, updates } = rawData.data || rawData;
+
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
 
@@ -180,27 +150,27 @@ export const updateProduct = createServerFn({ method: "POST" })
 
     // Create database object with snake_case field names manually
     const dbUpdates: any = {};
-    if (data.updates.slug !== undefined) dbUpdates.slug = data.updates.slug;
-    if (data.updates.name !== undefined) dbUpdates.name = data.updates.name;
-    if (data.updates.model !== undefined) dbUpdates.model = data.updates.model;
-    if (data.updates.category !== undefined) dbUpdates.category = data.updates.category;
-    if (data.updates.tagline !== undefined) dbUpdates.tagline = data.updates.tagline;
-    if (data.updates.description !== undefined) dbUpdates.description = data.updates.description;
-    if (data.updates.price !== undefined) dbUpdates.price = data.updates.price;
-    if (data.updates.compareAt !== undefined) dbUpdates.compare_at = data.updates.compareAt;
-    if (data.updates.stock !== undefined) dbUpdates.stock = data.updates.stock;
-    if (data.updates.rating !== undefined) dbUpdates.rating = data.updates.rating;
-    if (data.updates.reviews !== undefined) dbUpdates.reviews = data.updates.reviews;
-    if (data.updates.badge !== undefined) dbUpdates.badge = data.updates.badge;
-    if (data.updates.image !== undefined) dbUpdates.image = data.updates.image;
-    if (data.updates.highlights !== undefined) dbUpdates.highlights = data.updates.highlights;
-    if (data.updates.specs !== undefined) dbUpdates.specs = data.updates.specs;
-    if (data.updates.useCases !== undefined) dbUpdates.use_cases = data.updates.useCases;
+    if (updates.slug !== undefined) dbUpdates.slug = updates.slug;
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.model !== undefined) dbUpdates.model = updates.model;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.tagline !== undefined) dbUpdates.tagline = updates.tagline;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.compareAt !== undefined) dbUpdates.compare_at = updates.compareAt;
+    if (updates.stock !== undefined) dbUpdates.stock = updates.stock;
+    if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
+    if (updates.reviews !== undefined) dbUpdates.reviews = updates.reviews;
+    if (updates.badge !== undefined) dbUpdates.badge = updates.badge;
+    if (updates.image !== undefined) dbUpdates.image = updates.image;
+    if (updates.highlights !== undefined) dbUpdates.highlights = Array.isArray(updates.highlights) ? updates.highlights : [];
+    if (updates.specs !== undefined) dbUpdates.specs = Array.isArray(updates.specs) ? updates.specs : [];
+    if (updates.useCases !== undefined) dbUpdates.use_cases = Array.isArray(updates.useCases) ? updates.useCases : [];
 
     const { data: product, error } = await supabase
       .from("products")
       .update(dbUpdates)
-      .eq("id", data.id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -216,8 +186,10 @@ export const updateProduct = createServerFn({ method: "POST" })
  * Delete a product (admin only)
  */
 export const deleteProduct = createServerFn({ method: "POST" })
-  .validator(z.object({ id: z.string().uuid() }))
-  .handler(async ({ data }) => {
+  .handler(async (ctx) => {
+    const rawData = await ctx.request.json();
+    const { id } = rawData.data || rawData;
+
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
 
@@ -230,7 +202,7 @@ export const deleteProduct = createServerFn({ method: "POST" })
     const { error } = await supabase
       .from("products")
       .delete()
-      .eq("id", data.id);
+      .eq("id", id);
 
     if (error) {
       console.error("[Products] Delete error:", error);
