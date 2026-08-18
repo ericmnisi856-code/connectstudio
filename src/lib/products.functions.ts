@@ -10,17 +10,26 @@ const productSchema = z.object({
   tagline: z.string().min(1),
   description: z.string().min(1),
   price: z.number().min(0),
-  compareAt: z.number().min(0).optional().nullable(),
+  compareAt: z.union([z.number().min(0), z.string()]).optional().nullable().transform(val => {
+    if (typeof val === 'string') return val === '' ? undefined : Number(val);
+    return val;
+  }),
   stock: z.number().int().min(0),
   rating: z.number().min(0).max(5),
   reviews: z.number().int().min(0),
-  badge: z.string().optional().nullable(),
-  image: z.string().optional().nullable(),
+  badge: z.union([z.string(), z.null(), z.undefined()]).optional().transform(val => val === '' ? undefined : val),
+  image: z.union([z.string(), z.null(), z.undefined()]).optional().transform(val => val === '' ? undefined : val),
   highlights: z.array(z.string()).default([]),
-  specs: z.array(z.object({
-    label: z.string(),
-    value: z.string(),
-  })).default([]),
+  specs: z.union([
+    z.array(z.object({
+      label: z.string(),
+      value: z.string(),
+    })),
+    z.any()
+  ]).transform(val => {
+    if (Array.isArray(val)) return val;
+    return [];
+  }).default([]),
   useCases: z.array(z.string()).default([]),
 });
 
