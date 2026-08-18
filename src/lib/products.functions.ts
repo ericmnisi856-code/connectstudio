@@ -10,8 +10,9 @@ const productSchema = z.object({
   tagline: z.string().min(1),
   description: z.string().min(1),
   price: z.number().min(0),
-  compareAt: z.union([z.number().min(0), z.string()]).optional().nullable().transform(val => {
-    if (typeof val === 'string') return val === '' ? undefined : Number(val);
+  compareAt: z.union([z.number().min(0), z.string(), z.null(), z.undefined()]).optional().transform(val => {
+    if (!val || val === '') return undefined;
+    if (typeof val === 'string') return Number(val);
     return val;
   }),
   stock: z.number().int().min(0),
@@ -20,16 +21,10 @@ const productSchema = z.object({
   badge: z.union([z.string(), z.null(), z.undefined()]).optional().transform(val => val === '' ? undefined : val),
   image: z.union([z.string(), z.null(), z.undefined()]).optional().transform(val => val === '' ? undefined : val),
   highlights: z.array(z.string()).default([]),
-  specs: z.union([
-    z.array(z.object({
-      label: z.string(),
-      value: z.string(),
-    })),
-    z.any()
-  ]).transform(val => {
-    if (Array.isArray(val)) return val;
-    return [];
-  }).default([]),
+  specs: z.array(z.object({
+    label: z.string(),
+    value: z.string(),
+  })).default([]),
   useCases: z.array(z.string()).default([]),
 });
 
@@ -95,18 +90,12 @@ export const getProducts = createServerFn({ method: "GET" })
  * Create a new product (admin only)
  */
 export const createProduct = createServerFn({ method: "POST" })
-  .validator((rawData) => {
-    console.log("[Products] Raw data received:", JSON.stringify(rawData, null, 2));
-    try {
-      const result = productSchema.parse(rawData);
-      console.log("[Products] Validation passed:", JSON.stringify(result, null, 2));
-      return result;
-    } catch (error) {
-      console.error("[Products] Validation failed:", error);
-      throw error;
-    }
-  })
-  .handler(async ({ data }) => {
+  .validator(z.object({
+    data: productSchema,
+  }))
+  .handler(async ({ data: { data } }) => {
+    console.log("[Products] Validated data received:", JSON.stringify(data, null, 2));
+
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
 
@@ -115,8 +104,6 @@ export const createProduct = createServerFn({ method: "POST" })
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-
-    console.log("[Products] Creating product with data:", JSON.stringify(data, null, 2));
 
     // Create database object with snake_case field names manually
     const dbData = {
@@ -127,18 +114,18 @@ export const createProduct = createServerFn({ method: "POST" })
       tagline: data.tagline,
       description: data.description,
       price: data.price,
-      compare_at: data.compareAt,
+      compare_at: data.compareAt || null,
       stock: data.stock,
       rating: data.rating,
       reviews: data.reviews,
-      badge: data.badge,
-      image: data.image,
-      highlights: data.highlights,
-      specs: data.specs,
-      use_cases: data.useCases,
+      badge: data.badge || null,
+      image: data.image || null,
+      highlights: data.highlights || [],
+      specs: data.specs || [],
+      use_cases: data.useCases || [],
     };
 
-    console.log("[Products] DB data:", JSON.stringify(dbData, null, 2));
+    console.log("[Products] DB data to insert:", JSON.stringify(dbData, null, 2));
 
     const { data: product, error } = await supabase
       .from("products")
@@ -151,6 +138,7 @@ export const createProduct = createServerFn({ method: "POST" })
       throw new Error("Failed to create product: " + error.message);
     }
 
+    console.log("[Products] Product created successfully:", product);
     return toCamelCase(product);
   });
 
