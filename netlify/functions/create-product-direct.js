@@ -1,62 +1,69 @@
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async (event, context) => {
+  console.log("[Direct] Function called, method:", event.httpMethod);
+  
   // Only allow POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
 
   try {
-    const data = JSON.parse(event.body);
+    const data = JSON.parse(event.body || '{}');
     console.log("[Direct] Raw product data:", JSON.stringify(data, null, 2));
 
+    // Check environment variables
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+    
+    console.log("[Direct] Environment check:", {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseKey,
+      urlPrefix: supabaseUrl ? supabaseUrl.substring(0, 20) + '...' : 'missing'
+    });
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new Error("Missing Supabase credentials");
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          error: "Missing Supabase credentials",
+          debug: {
+            hasUrl: !!supabaseUrl,
+            hasKey: !!supabaseKey
+          }
+        })
+      };
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Ensure arrays are arrays, handle form data
-    let specs = [];
-    let useCases = [];
-    let highlights = [];
-
-    if (data.specs && Array.isArray(data.specs)) {
-      specs = data.specs.filter(s => s && s.label && s.value);
-    }
-    
-    if (data.useCases && Array.isArray(data.useCases)) {
-      useCases = data.useCases.filter(u => u && u.trim());
-    }
-    
-    if (data.highlights && Array.isArray(data.highlights)) {
-      highlights = data.highlights.filter(h => h && h.trim());
-    }
-
-    // Create database object with snake_case
+    // Create clean database object
     const dbData = {
-      slug: String(data.slug || ''),
-      name: String(data.name || ''),
-      model: String(data.model || ''),
-      category: String(data.category || ''),
-      tagline: String(data.tagline || ''),
-      description: String(data.description || ''),
+      slug: String(data.slug || '').trim(),
+      name: String(data.name || '').trim(),
+      model: String(data.model || '').trim(),
+      category: String(data.category || '').trim(),
+      tagline: String(data.tagline || '').trim(),
+      description: String(data.description || '').trim(),
       price: Number(data.price) || 0,
       compare_at: data.compareAt ? Number(data.compareAt) : null,
       stock: Number(data.stock) || 0,
-      rating: Number(data.rating) || 0,
+      rating: Number(data.rating) || 4.5,
       reviews: Number(data.reviews) || 0,
-      badge: data.badge || null,
-      image: data.image || null,
-      highlights: highlights,
-      specs: specs,
-      use_cases: useCases,
+      badge: data.badge && data.badge.trim() ? data.badge.trim() : null,
+      image: data.image && data.image.trim() ? data.image.trim() : null,
+      highlights: [], // Always empty for now
+      specs: [], // Always empty for now
+      use_cases: [], // Always empty for now
     };
 
     console.log("[Direct] DB insert data:", JSON.stringify(dbData, null, 2));
@@ -71,7 +78,13 @@ exports.handler = async (event, context) => {
       console.error("[Direct] Database error:", error);
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: `Database error: ${error.message}` })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          error: `Database error: ${error.message}`,
+          details: error
+        })
       };
     }
 
@@ -93,9 +106,9 @@ exports.handler = async (event, context) => {
       reviews: product.reviews,
       badge: product.badge,
       image: product.image,
-      highlights: product.highlights,
-      specs: product.specs,
-      useCases: product.use_cases,
+      highlights: product.highlights || [],
+      specs: product.specs || [],
+      useCases: product.use_cases || [],
       createdAt: product.created_at,
       updatedAt: product.updated_at,
     };
@@ -112,7 +125,13 @@ exports.handler = async (event, context) => {
     console.error("[Direct] Handler error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        error: error.message,
+        stack: error.stack
+      })
     };
   }
 };
