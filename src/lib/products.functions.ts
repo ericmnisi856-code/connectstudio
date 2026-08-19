@@ -58,17 +58,13 @@ export const getProducts = createServerFn({ method: "GET" })
   });
 
 /**
- * Create a new product (admin only) - NO VALIDATION VERSION
+ * Create a new product (admin only) - FIXED VERSION
  */
 export const createProductNew = createServerFn({ method: "POST" })
-  .handler(async (ctx) => {
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
     try {
-      const rawData = await ctx.request.json();
-      console.log("[Products] Raw request data:", JSON.stringify(rawData, null, 2));
-      
-      // Extract data from wrapper if present
-      const data = rawData.data || rawData;
-      console.log("[Products] Extracted product data:", JSON.stringify(data, null, 2));
+      console.log("[Products] Processing product data:", JSON.stringify(data, null, 2));
 
       const supabaseUrl = process.env["SUPABASE_URL"];
       const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
@@ -80,20 +76,20 @@ export const createProductNew = createServerFn({ method: "POST" })
       const supabase = createClient(supabaseUrl, supabaseKey);
 
       // Ensure arrays are arrays, not objects
-      let specs = [];
-      let useCases = [];
-      let highlights = [];
+      let specs: { label: string; value: string }[] = [];
+      let useCases: string[] = [];
+      let highlights: string[] = [];
 
       if (data.specs && Array.isArray(data.specs)) {
-        specs = data.specs.filter(s => s && s.label && s.value);
+        specs = data.specs.filter((s: any) => s && s.label && s.value);
       }
       
       if (data.useCases && Array.isArray(data.useCases)) {
-        useCases = data.useCases.filter(u => u && u.trim());
+        useCases = data.useCases.filter((u: any) => u && u.trim());
       }
       
       if (data.highlights && Array.isArray(data.highlights)) {
-        highlights = data.highlights.filter(h => h && h.trim());
+        highlights = data.highlights.filter((h: any) => h && h.trim());
       }
 
       // Create database object with snake_case field names
@@ -139,12 +135,12 @@ export const createProductNew = createServerFn({ method: "POST" })
   });
 
 /**
- * Update an existing product (admin only)
+ * Update an existing product (admin only) - FIXED VERSION
  */
 export const updateProduct = createServerFn({ method: "POST" })
-  .handler(async (ctx) => {
-    const rawData = await ctx.request.json();
-    const { id, updates } = rawData.data || rawData;
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
+    const { id, updates } = data;
 
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
@@ -190,12 +186,12 @@ export const updateProduct = createServerFn({ method: "POST" })
   });
 
 /**
- * Delete a product (admin only)
+ * Delete a product (admin only) - FIXED VERSION
  */
 export const deleteProduct = createServerFn({ method: "POST" })
-  .handler(async (ctx) => {
-    const rawData = await ctx.request.json();
-    const { id } = rawData.data || rawData;
+  .validator((data: any) => data)
+  .handler(async ({ data }) => {
+    const { id } = data;
 
     const supabaseUrl = process.env["SUPABASE_URL"];
     const supabaseKey = process.env["SUPABASE_PUBLISHABLE_KEY"];
