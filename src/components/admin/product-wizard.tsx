@@ -130,13 +130,8 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
 
       console.log('[Wizard] Submitting product:', dbProduct);
 
-      // BYPASS NETLIFY FUNCTION - Use direct Supabase in browser
-      const supabaseUrl = 'https://pfaagqmkffqgqadmyokk.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmYWFncW1rZmZxZ3FhZG15b2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjM4MDIzMzUsImV4cCI6MjAzOTM3ODMzNX0.lJJa5P8LKoVfBa8_c5YKlTGNJnYWfI1Qy-CJNJwfpXI';
-      
-      // Import Supabase client directly
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      // Use the existing Supabase client that's already working in the app
+      const { supabase } = await import('@/integrations/supabase/client');
       
       const { data: product, error } = await supabase
         .from("products")
@@ -145,7 +140,7 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
         .single();
 
       if (error) {
-        console.error('[Wizard] Direct Supabase error:', error);
+        console.error('[Wizard] Supabase error:', error);
         throw new Error(`Database error: ${error.message}`);
       }
 
