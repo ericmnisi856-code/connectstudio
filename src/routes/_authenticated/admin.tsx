@@ -11,8 +11,7 @@ import {
   useStatusMutation,
   type Order,
 } from "@/components/admin/admin-dashboard";
-import { ProductManagement } from "@/components/admin/product-management";
-import { SimpleProductAdder } from "@/components/admin/simple-product-adder";
+import { NewProductManager } from "@/components/admin/new-product-manager";
 import { getIsAdmin, listOrders, updateOrderStatus } from "@/lib/orders.functions";
 import { getProducts, createProductNew, updateProduct, deleteProduct } from "@/lib/products.functions";
 import { products, type Product } from "@/lib/catalog";
@@ -70,64 +69,6 @@ function AdminPage() {
     queryClient.clear();
     await supabase.auth.signOut();
     await navigate({ to: "/auth", replace: true });
-  }
-
-  async function handleProductCreate(product: any) {
-    try {
-      console.log("Sending product data:", product);
-      
-      // Direct API call bypassing TanStack validation
-      const response = await fetch('/.netlify/functions/create-product-direct', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(product)
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API Error: ${response.status} - ${errorText}`);
-      }
-
-      const result = await response.json();
-      await queryClient.invalidateQueries({ queryKey: ["products"] });
-      
-      return result;
-    } catch (error) {
-      console.error("Create product error:", error);
-      throw error;
-    }
-  }
-
-  async function handleProductUpdate(slug: string, product: any) {
-    try {
-      // Find product by slug to get its ID
-      const productToUpdate = productsQuery.data?.find((p: any) => p.slug === slug);
-      if (!productToUpdate?.id) {
-        throw new Error("Product not found");
-      }
-      await editProduct({ data: { id: productToUpdate.id, updates: product } });
-      await queryClient.invalidateQueries({ queryKey: ["products"] });
-    } catch (error) {
-      console.error("Update product error:", error);
-      throw error;
-    }
-  }
-
-  async function handleProductDelete(slug: string) {
-    try {
-      // Find product by slug to get its ID
-      const productToDelete = productsQuery.data?.find((p: any) => p.slug === slug);
-      if (!productToDelete?.id) {
-        throw new Error("Product not found");
-      }
-      await removeProduct({ data: { id: productToDelete.id } });
-      await queryClient.invalidateQueries({ queryKey: ["products"] });
-    } catch (error) {
-      console.error("Delete product error:", error);
-      throw error;
-    }
   }
 
   if (adminQuery.isLoading) {
@@ -189,17 +130,10 @@ function AdminPage() {
         </TabsContent>
 
         <TabsContent value="products" className="mt-6">
-          <div className="space-y-8">
-            <SimpleProductAdder 
-              onProductAdded={() => queryClient.invalidateQueries({ queryKey: ["products"] })}
-            />
-            <ProductManagement
-              products={productsQuery.data ?? []}
-              onProductCreate={handleProductCreate}
-              onProductUpdate={handleProductUpdate}
-              onProductDelete={handleProductDelete}
-            />
-          </div>
+          <NewProductManager
+            products={productsQuery.data ?? []}
+            onRefresh={() => queryClient.invalidateQueries({ queryKey: ["products"] })}
+          />
         </TabsContent>
       </Tabs>
     </div>
