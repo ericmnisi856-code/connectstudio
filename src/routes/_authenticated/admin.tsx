@@ -12,8 +12,10 @@ import {
   type Order,
 } from "@/components/admin/admin-dashboard";
 import { NewProductManager } from "@/components/admin/new-product-manager";
+// OLD BROKEN SYSTEM DISABLED - import { ProductManagement } from "@/components/admin/product-management";
 import { getIsAdmin, listOrders, updateOrderStatus } from "@/lib/orders.functions";
-import { getProducts, createProductNew, updateProduct, deleteProduct } from "@/lib/products.functions";
+import { getProducts } from "@/lib/products.functions";
+// OLD BROKEN IMPORTS REMOVED - NO MORE TanStack product functions
 import { products, type Product } from "@/lib/catalog";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -46,9 +48,7 @@ function AdminPage() {
   const fetchOrders = useServerFn(listOrders);
   const fetchProducts = useServerFn(getProducts);
   const setStatus = useServerFn(updateOrderStatus);
-  const addProduct = useServerFn(createProductNew);
-  const editProduct = useServerFn(updateProduct);
-  const removeProduct = useServerFn(deleteProduct);
+  // OLD BROKEN FUNCTIONS REMOVED - Using direct API calls now
 
   const adminQuery = useQuery({ queryKey: ["is-admin"], queryFn: () => fetchIsAdmin() });
   const ordersQuery = useQuery({
