@@ -130,21 +130,47 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
 
       console.log('[Wizard] Submitting product:', dbProduct);
 
-      // Call our bulletproof direct API
-      const response = await fetch('/.netlify/functions/create-product-direct', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dbProduct)
-      });
+      // BYPASS NETLIFY FUNCTION - Use direct Supabase in browser
+      const supabaseUrl = 'https://pfaagqmkffqgqadmyokk.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmYWFncW1rZmZxZ3FhZG15b2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjM4MDIzMzUsImV4cCI6MjAzOTM3ODMzNX0.lJJa5P8LKoVfBa8_c5YKlTGNJnYWfI1Qy-CJNJwfpXI';
+      
+      // Import Supabase client directly
+      const { createClient } = await import('@supabase/supabase-js');
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      const { data: product, error } = await supabase
+        .from("products")
+        .insert([dbProduct])
+        .select()
+        .single();
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.error || `HTTP ${response.status}: ${response.statusText}`);
+      if (error) {
+        console.error('[Wizard] Direct Supabase error:', error);
+        throw new Error(`Database error: ${error.message}`);
       }
 
-      const result = await response.json();
+      const result = {
+        id: product.id,
+        slug: product.slug,
+        name: product.name,
+        model: product.model,
+        category: product.category,
+        tagline: product.tagline,
+        description: product.description,
+        price: product.price,
+        compareAt: product.compare_at,
+        stock: product.stock,
+        rating: product.rating,
+        reviews: product.reviews,
+        badge: product.badge,
+        image: product.image,
+        highlights: product.highlights || [],
+        specs: product.specs || [],
+        useCases: product.use_cases || [],
+        createdAt: product.created_at,
+        updatedAt: product.updated_at,
+      };
+
       console.log('[Wizard] Product created successfully:', result);
       
       toast.success(`Product "${productData.name}" created successfully!`);
