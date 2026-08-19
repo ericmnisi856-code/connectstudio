@@ -108,8 +108,8 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
     setLoading(true);
     
     try {
-      // Create clean product object for database
-      const dbProduct = {
+      // Create clean product object using the EXACT SAME pattern as the working shop page
+      const cleanProduct = {
         slug: productData.slug.trim(),
         name: productData.name.trim(),
         model: productData.model.trim(),
@@ -117,55 +117,35 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
         tagline: productData.tagline.trim(),
         description: productData.description.trim(),
         price: productData.price,
-        compare_at: productData.compareAt || null,
+        compareAt: productData.compareAt || null,
         stock: productData.stock,
         rating: productData.rating,
         reviews: productData.reviews,
         badge: productData.badge?.trim() || null,
         image: productData.image?.trim() || null,
-        highlights: [], // Empty array - no validation issues
-        specs: [], // Empty array - no validation issues  
-        use_cases: [], // Empty array - no validation issues
+        highlights: [], // Empty array
+        specs: [], // Empty array  
+        useCases: [], // Empty array
       };
 
-      console.log('[Wizard] Submitting product:', dbProduct);
+      console.log('[Wizard] Submitting product via server function:', cleanProduct);
 
-      // Use the existing Supabase client that's already working in the app
-      const { supabase } = await import('@/integrations/supabase/client');
-      
-      const { data: product, error } = await supabase
-        .from("products")
-        .insert([dbProduct])
-        .select()
-        .single();
+      // Use the server function that actually works (same as the shop page uses)
+      const response = await fetch('/.netlify/functions/create-product-direct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cleanProduct),
+      });
 
-      if (error) {
-        console.error('[Wizard] Supabase error:', error);
-        throw new Error(`Database error: ${error.message}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Wizard] API error response:', errorText);
+        throw new Error(`Failed to create product: ${response.status} ${response.statusText}`);
       }
 
-      const result = {
-        id: product.id,
-        slug: product.slug,
-        name: product.name,
-        model: product.model,
-        category: product.category,
-        tagline: product.tagline,
-        description: product.description,
-        price: product.price,
-        compareAt: product.compare_at,
-        stock: product.stock,
-        rating: product.rating,
-        reviews: product.reviews,
-        badge: product.badge,
-        image: product.image,
-        highlights: product.highlights || [],
-        specs: product.specs || [],
-        useCases: product.use_cases || [],
-        createdAt: product.created_at,
-        updatedAt: product.updated_at,
-      };
-
+      const result = await response.json();
       console.log('[Wizard] Product created successfully:', result);
       
       toast.success(`Product "${productData.name}" created successfully!`);
@@ -173,7 +153,7 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
       
     } catch (error: any) {
       console.error('[Wizard] Error creating product:', error);
-      toast.error(error.message || 'Failed to create product');
+      toast.error(error.message || 'Failed to create product. Please try again.');
     } finally {
       setLoading(false);
     }
