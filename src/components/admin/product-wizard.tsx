@@ -128,10 +128,10 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
         useCases: [], // Empty array
       };
 
-      console.log('[Wizard] Submitting product via server function:', cleanProduct);
+      console.log('[Wizard] Submitting product via Netlify Blobs:', cleanProduct);
 
-      // Use the server function that actually works (same as the shop page uses)
-      const response = await fetch('/.netlify/functions/create-product-direct', {
+      // Use Netlify Blobs API - no database, no auth required!
+      const response = await fetch('/api/products/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

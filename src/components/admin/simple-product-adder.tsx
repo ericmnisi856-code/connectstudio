@@ -39,8 +39,8 @@ export function SimpleProductAdder({ onProductAdded }: SimpleProductAdderProps) 
 
       console.log("Quick adding product:", product);
 
-      // Call direct Netlify function to bypass TanStack validation
-      const response = await fetch('/.netlify/functions/create-product-direct', {
+      // Call Netlify Blobs API - no database, no auth!
+      const response = await fetch('/api/products/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
