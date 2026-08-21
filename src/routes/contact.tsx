@@ -42,7 +42,9 @@ function ContactPage() {
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData);
+    
     const result = schema.safeParse(data);
     if (!result.success) {
       const next: Record<string, string> = {};
@@ -52,19 +54,21 @@ function ContactPage() {
     }
     setErrors({});
     
-    // Submit to Netlify Forms (will forward to accounts@connectstudio.co.za)
-    fetch('/', {
+    // Submit to our API endpoint
+    fetch('/api/contact', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        'form-name': 'contact',
-        ...data as any
-      }).toString()
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
     })
-      .then(() => {
-        setSent(true);
-        toast.success("Enquiry received — we'll reply within one business day.");
-        e.currentTarget.reset();
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          setSent(true);
+          toast.success("Enquiry received — we'll reply within one business day.");
+          e.currentTarget.reset();
+        } else {
+          throw new Error(result.error || 'Failed to send');
+        }
       })
       .catch((error) => {
         console.error('Form submission error:', error);
@@ -97,16 +101,7 @@ function ContactPage() {
           onSubmit={onSubmit} 
           className="rounded-2xl border border-border/70 bg-card p-8" 
           noValidate
-          name="contact"
-          method="POST"
-          data-netlify="true"
-          netlify-honeypot="bot-field"
         >
-          {/* Netlify form detection */}
-          <input type="hidden" name="form-name" value="contact" />
-          {/* Honeypot field for spam protection */}
-          <input type="hidden" name="bot-field" />
-          
           <div className="grid gap-5 sm:grid-cols-2">
             <Field id="name" label="Full name" error={errors["name"]} />
             <Field id="email" label="Email" type="email" error={errors["email"]} />

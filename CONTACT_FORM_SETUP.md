@@ -1,165 +1,175 @@
-# 📧 Contact Form Email Setup
+# 📧 Contact Form Email Setup (Simplified)
 
 ## ✅ What's Been Done
 
 1. **Category input** - Changed from dropdown to manual text input
-2. **Contact form** - Now uses Netlify Forms (built-in email forwarding)
+2. **Contact form** - Uses custom API endpoint (`/api/contact`)
+3. **Email logging** - All submissions logged in Netlify function logs
 
 ---
 
-## 🔧 Netlify Forms Setup (One-Time Configuration)
+## 🔧 Email Setup (Optional - Choose One)
 
-After deployment, configure email forwarding in Netlify:
+### Option 1: Use Resend.com (Recommended - FREE)
 
-### Step 1: Go to Netlify Dashboard
+**100 emails/day free forever!**
 
-1. Open your Netlify dashboard
-2. Select your site
-3. Go to **Forms** tab in the sidebar
+1. Sign up at https://resend.com
+2. Verify your domain (connectstudio.co.za) or use their test domain
+3. Get your API key
+4. Add to Netlify environment variables:
+   - Key: `RESEND_API_KEY`
+   - Value: Your API key from Resend
+5. Redeploy site
 
-### Step 2: Configure Email Notifications
+**That's it!** Emails will be sent to accounts@connectstudio.co.za
 
-1. You should see the "contact" form listed
-2. Click **Settings and email notifications**
-3. Click **Add notification**
-4. Select **Email notification**
-5. Enter: **accounts@connectstudio.co.za**
-6. Click **Save**
+### Option 2: Just Use Netlify Logs (Current Setup)
 
-### Step 3: Test the Form
+**No configuration needed!**
 
-1. Go to your live site contact page
-2. Fill out the form
-3. Submit
-4. Check **accounts@connectstudio.co.za** inbox
-5. You should receive the form submission!
-
----
-
-## 📋 What Gets Sent
-
-When someone submits the contact form, **accounts@connectstudio.co.za** receives:
-
-```
-New form submission from: Studio Connect Contact Form
-
-Name: John Doe
-Email: john@example.com
-Phone: 0123456789
-Company: ABC Corp
-Message: I need a quote for 50 access points...
-
-Submitted: 2026-08-21 14:30
-```
+- All form submissions are logged in Netlify function logs
+- You can view them anytime in Netlify dashboard
+- Good for testing and low-volume sites
+- To check submissions:
+  1. Netlify Dashboard → Functions tab
+  2. Click on `send-contact-email`
+  3. View logs for submissions
 
 ---
 
-## 🎯 Features
+## 📋 What Happens Now
 
-### ✅ Spam Protection
-- Honeypot field (catches bots)
-- Netlify's built-in spam filtering
-- reCAPTCHA (optional, can be enabled)
+### With Resend API Key:
+1. User submits form
+2. Email sent to **accounts@connectstudio.co.za**
+3. Submission logged in Netlify logs (backup)
+4. User sees success message
 
-### ✅ Form Submissions Logged
-- All submissions stored in Netlify dashboard
-- Can view/export submissions anytime
-- Downloadable as CSV
-
-### ✅ Multiple Notifications
-- Can add multiple email addresses
-- Can set up Slack notifications
-- Can use webhooks for custom integrations
+### Without API Key (Current):
+1. User submits form
+2. Submission logged in Netlify function logs
+3. User sees success message
+4. You check logs manually in Netlify dashboard
 
 ---
 
-## 🔄 Alternative: SendGrid Integration (Optional)
+## 🎯 Resend Setup Steps (Detailed)
 
-If you want more control over emails, you can integrate SendGrid:
+### 1. Create Resend Account
+- Go to https://resend.com
+- Sign up (free account)
+- Verify your email
 
-### 1. Install SendGrid Package
+### 2. Get API Key
+- Go to Dashboard → API Keys
+- Click "Create API Key"
+- Name it: "Studio Connect Contact Form"
+- Copy the key (starts with `re_`)
 
-```bash
-npm install @sendgrid/mail
-```
+### 3. Add to Netlify
+- Netlify Dashboard → Site settings
+- Environment variables
+- Add variable:
+  - **Key:** `RESEND_API_KEY`
+  - **Value:** `re_xxxxx...` (your key)
+- Save
 
-### 2. Get SendGrid API Key
+### 4. Redeploy
+- Go to Deploys tab
+- Click "Trigger deploy"
+- Select "Deploy site"
+- Wait 2 minutes
 
-1. Sign up at https://sendgrid.com
-2. Create API key
-3. Add to Netlify environment variables:
-   - Key: `SENDGRID_API_KEY`
-   - Value: Your API key
-
-### 3. Update the Function
-
-The function `netlify/functions/send-contact-email.js` is ready - just uncomment the SendGrid code and add your API key.
+### 5. Test
+- Go to `/contact` on your site
+- Submit a test message
+- Check accounts@connectstudio.co.za inbox
+- Should receive email! ✅
 
 ---
 
-## 📊 Form Analytics
+## 📊 Monitoring Submissions
 
-Netlify Forms provides:
-- Submission count
-- Success/failure rate
-- Spam detection rate
-- Export to CSV
-- Webhook triggers
+### View in Netlify Logs:
+1. Netlify Dashboard
+2. Functions tab
+3. Click `send-contact-email`
+4. See all submissions with:
+   - Name
+   - Email  
+   - Company
+   - Message
+   - Timestamp
+
+### Export Logs:
+- Use Netlify CLI: `netlify functions:log send-contact-email`
+- Or view in dashboard and copy/paste
 
 ---
 
 ## 🚨 Troubleshooting
 
-### Form not appearing in Netlify dashboard?
+### Form submits but no email?
 
-1. **Deploy the site** (forms only appear after deployment)
-2. **Wait 2-3 minutes** after deployment
-3. **Submit a test** to initialize the form
-4. Check Netlify dashboard → Forms tab
+**Check logs first:**
+1. Netlify → Functions → `send-contact-email`
+2. Look for recent logs
+3. Should see: `[Contact Form] New submission from: ...`
 
-### Not receiving emails?
+**If using Resend:**
+1. Check RESEND_API_KEY is set correctly
+2. Check Resend dashboard for delivery status
+3. Check spam folder
+4. Verify accounts@connectstudio.co.za is correct
 
-1. **Check spam folder**
-2. **Verify email in Netlify** → Forms → Notifications
-3. **Test with different email** to rule out email provider issues
-4. **Check Netlify logs** for form submissions
+### Form doesn't submit?
 
-### Form submission fails?
-
-1. **Check browser console** for errors
-2. **Verify form has** `data-netlify="true"` attribute
-3. **Ensure** `name="contact"` matches hidden input
-4. **Try refreshing** the page
+1. Check browser console for errors
+2. Try different browser
+3. Check network tab for API call to `/api/contact`
+4. Should return `{ success: true }`
 
 ---
 
-## 💡 Category Input Changes
+## 💡 Why This Approach?
 
-### Product Wizard (Add/Edit Products)
+### Advantages:
+- ✅ **Works immediately** (even without API key)
+- ✅ **Free** (Resend free tier or just logs)
+- ✅ **Simple** (one environment variable)
+- ✅ **Reliable** (logged even if email fails)
+- ✅ **No Netlify Forms issues** (custom endpoint)
 
-**Before:**
-- Dropdown with 3 fixed options
-- Limited to: EG Series, Wireless Routers, NBR Security
-
-**After:**
-- Text input field
-- Enter any category name
-- Examples: "switches", "routers", "access-points", "cables", "cameras"
-
-### Benefits:
-- ✅ Unlimited categories
-- ✅ Custom naming
-- ✅ More flexible
-- ✅ Easy to use
+### vs Netlify Forms:
+- ❌ Netlify Forms requires plan upgrade for notifications
+- ❌ Netlify Forms has submission limits on free tier
+- ✅ This solution is completely free
+- ✅ More control over email format
 
 ---
 
 ## 📝 Summary
 
-- ✅ Contact form submits to **accounts@connectstudio.co.za**
-- ✅ Category is now manual text input (not dropdown)
-- ✅ Spam protection included
-- ✅ All submissions logged in Netlify
-- ✅ Easy to manage and export
+**Current State (No Setup):**
+- ✅ Form works
+- ✅ Submissions logged in Netlify
+- ❌ No email sent
 
-**Configure email forwarding in Netlify dashboard after deployment!**
+**With Resend (5 min setup):**
+- ✅ Form works
+- ✅ Submissions logged in Netlify
+- ✅ **Email sent to accounts@connectstudio.co.za**
+
+**Recommendation:** Add Resend API key for automatic emails!
+
+---
+
+## 🎉 Category Input (No Setup Needed)
+
+- ✅ Text input (not dropdown)
+- ✅ Type any category
+- ✅ Works immediately
+- ✅ No configuration required
+
+**Both features deployed and working!**
