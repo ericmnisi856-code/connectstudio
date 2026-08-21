@@ -137,8 +137,15 @@ CREATE TABLE IF NOT EXISTS products (
   price numeric NOT NULL CHECK (price >= 0),
   stock integer NOT NULL DEFAULT 0 CHECK (stock >= 0),
   description text,
-  features jsonb DEFAULT '[]'::jsonb,
+  tagline text,
+  compare_at numeric CHECK (compare_at >= 0),
+  rating numeric DEFAULT 4.5 CHECK (rating >= 0 AND rating <= 5),
+  reviews integer DEFAULT 0 CHECK (reviews >= 0),
+  badge text,
+  image text,
+  highlights jsonb DEFAULT '[]'::jsonb,
   specs jsonb DEFAULT '{}'::jsonb,
+  use_cases jsonb DEFAULT '[]'::jsonb,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 );
