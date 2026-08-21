@@ -54,26 +54,27 @@ function ContactPage() {
     }
     setErrors({});
     
-    // Submit to our API endpoint
-    fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    })
-      .then(response => response.json())
-      .then(result => {
-        if (result.success) {
-          setSent(true);
-          toast.success("Enquiry received — we'll reply within one business day.");
-          e.currentTarget.reset();
-        } else {
-          throw new Error(result.error || 'Failed to send');
-        }
-      })
-      .catch((error) => {
-        console.error('Form submission error:', error);
-        toast.error("Failed to send message. Please email us directly at accounts@connectstudio.co.za");
-      });
+    // Format WhatsApp message
+    const whatsappNumber = "27766768658";
+    const whatsappMessage = `
+*New Contact Form Enquiry*
+
+*Name:* ${data.name}
+*Email:* ${data.email}
+*Phone:* ${data.phone || 'Not provided'}
+*Company:* ${data.company || 'Not provided'}
+
+*Message:*
+${data.message}
+    `.trim();
+    
+    // Open WhatsApp with pre-filled message
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+    window.open(whatsappUrl, '_blank');
+    
+    setSent(true);
+    toast.success("Opening WhatsApp to send your enquiry!");
+    e.currentTarget.reset();
   }
 
   return (
