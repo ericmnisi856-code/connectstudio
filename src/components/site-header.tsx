@@ -37,7 +37,7 @@ export function SiteHeader() {
           <img 
             src="/images/logo.png" 
             alt="Studio Connect" 
-            className="h-20 w-auto object-contain transition-transform hover:scale-105"
+            className="h-20 w-auto object-contain rounded-lg transition-transform hover:scale-105 shadow-sm"
           />
         </Link>
 
