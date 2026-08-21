@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { CheckCircle, Circle, ArrowRight, ArrowLeft, Package, Loader2 } from "lucide-react";
+import { CheckCircle, Circle, ArrowRight, ArrowLeft, Package, Loader2, Trash2 } from "lucide-react";
 
 interface ProductWizardProps {
   onSuccess: () => void;
@@ -36,6 +36,8 @@ interface ProductData {
 export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
+  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
   const [productData, setProductData] = React.useState<ProductData>({
     name: '',
     model: '',
@@ -73,6 +75,73 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
       updateData('slug', generateSlug(productData.name));
     }
   }, [productData.name, productData.slug]);
+
+  React.useEffect(() => {
+    // Set preview if image URL exists
+    if (productData.image) {
+      setImagePreview(productData.image);
+    }
+  }, [productData.image]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Invalid file type. Only JPG, PNG, WebP and GIF are allowed.');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error('File too large. Maximum size is 5MB.');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      // Show preview immediately
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to upload image');
+      }
+
+      const result = await response.json();
+      updateData('image', result.url);
+      toast.success('Image uploaded successfully!');
+
+    } catch (error: any) {
+      console.error('[ImageUpload] Error:', error);
+      toast.error(error.message || 'Failed to upload image');
+      setImagePreview(null);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const removeImage = () => {
+    updateData('image', '');
+    setImagePreview(null);
+  };
 
   const validateStep1 = () => {
     return productData.name.trim() && 
@@ -337,28 +406,76 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Advanced Settings</h3>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="badge">Badge (Optional)</Label>
-                <Input
-                  id="badge"
-                  value={productData.badge || ''}
-                  onChange={(e) => updateData('badge', e.target.value)}
-                  placeholder="e.g. Best Seller, New, Sale"
-                  className="mt-1.5"
-                />
+            {/* Image Upload Section */}
+            <div>
+              <Label htmlFor="image-upload">Product Image</Label>
+              <div className="mt-2 space-y-3">
+                {imagePreview ? (
+                  <div className="relative w-full max-w-md">
+                    <img
+                      src={imagePreview}
+                      alt="Product preview"
+                      className="w-full h-48 object-cover rounded-lg border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={removeImage}
+                      disabled={uploadingImage}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="image-upload"
+                      className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        {uploadingImage ? (
+                          <>
+                            <Loader2 className="w-10 h-10 mb-3 text-muted-foreground animate-spin" />
+                            <p className="text-sm text-muted-foreground">Uploading image...</p>
+                          </>
+                        ) : (
+                          <>
+                            <Package className="w-10 h-10 mb-3 text-muted-foreground" />
+                            <p className="mb-2 text-sm text-muted-foreground">
+                              <span className="font-semibold">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PNG, JPG, WebP or GIF (MAX. 5MB)
+                            </p>
+                          </>
+                        )}
+                      </div>
+                      <input
+                        id="image-upload"
+                        type="file"
+                        className="hidden"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                      />
+                    </label>
+                  </div>
+                )}
               </div>
-              
-              <div>
-                <Label htmlFor="image">Image URL (Optional)</Label>
-                <Input
-                  id="image"
-                  value={productData.image || ''}
-                  onChange={(e) => updateData('image', e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="mt-1.5"
-                />
-              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="badge">Badge (Optional)</Label>
+              <Input
+                id="badge"
+                value={productData.badge || ''}
+                onChange={(e) => updateData('badge', e.target.value)}
+                placeholder="e.g. Best Seller, New, Sale"
+                className="mt-1.5"
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
