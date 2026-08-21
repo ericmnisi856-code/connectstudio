@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Check, Minus, Plus, ShieldCheck, Star, Truck } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
@@ -9,17 +10,26 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductVisual } from "@/components/product-visual";
 import { ProductCard } from "@/components/product-card";
-import { formatZAR, getProduct, products, type Product } from "@/lib/catalog";
+import { formatZAR } from "@/lib/catalog";
 import { useCart } from "@/lib/cart";
 
+type Product = any; // Use any for now since products come from API
+
 export const Route = createFileRoute("/products/$slug")({
-  loader: ({ params }): { product: Product } => {
-    const product = getProduct(params.slug);
-    if (!product) throw notFound();
-    return { product };
+  loader: async ({ params }): Promise<{ product: Product | null }> => {
+    try {
+      const response = await fetch('/api/products/list');
+      if (!response.ok) return { product: null };
+      const products = await response.json();
+      const product = products.find((p: any) => p.slug === params.slug);
+      if (!product) throw notFound();
+      return { product };
+    } catch (error) {
+      throw notFound();
+    }
   },
   head: ({ loaderData }) => {
-    if (!loaderData) {
+    if (!loaderData || !loaderData.product) {
       return {
         meta: [{ title: "Product not found | Studio Connect" }, { name: "robots", content: "noindex" }],
       };
@@ -29,9 +39,9 @@ export const Route = createFileRoute("/products/$slug")({
     return {
       meta: [
         { title },
-        { name: "description", content: product.description.slice(0, 155) },
+        { name: "description", content: (product.description || '').slice(0, 155) },
         { property: "og:title", content: title },
-        { property: "og:description", content: product.tagline },
+        { property: "og:description", content: product.tagline || '' },
       ],
     };
   },
@@ -50,12 +60,38 @@ export const Route = createFileRoute("/products/$slug")({
 });
 
 function ProductDetail() {
-  const { product } = Route.useLoaderData() as { product: Product };
+  const loaderData = Route.useLoaderData();
+  const product = loaderData?.product;
+  
+  // Fetch all products for related products
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await fetch('/api/products/list');
+      if (!response.ok) return [];
+      return response.json();
+    },
+  });
+
   const { add } = useCart();
   const [qty, setQty] = React.useState(1);
 
-  const related = products
-    .filter((p) => p.category === product.category && p.slug !== product.slug)
+  if (!product) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-32 text-center">
+        <h1 className="font-display text-3xl font-bold">Product not found</h1>
+        <p className="mt-3 text-muted-foreground">That model isn't in our catalogue.</p>
+        <Button asChild className="mt-6 bg-emerald-gradient text-primary-foreground">
+          <Link to="/products" search={{}}>
+            Back to shop
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const related = allProducts
+    .filter((p: any) => p.category === product.category && p.slug !== product.slug)
     .slice(0, 3);
 
   return (
@@ -93,15 +129,15 @@ function ProductDetail() {
                 <Star
                   key={i}
                   className={
-                    i < Math.round(product.rating)
+                    i < Math.round(product.rating || 0)
                       ? "size-4 fill-primary text-primary"
                       : "size-4 text-muted-foreground/40"
                   }
                 />
               ))}
             </span>
-            <span className="font-medium">{product.rating}</span>
-            <span className="text-muted-foreground">({product.reviews} reviews)</span>
+            <span className="font-medium">{product.rating || 0}</span>
+            <span className="text-muted-foreground">({product.reviews || 0} reviews)</span>
           </div>
 
           <div className="mt-7 flex items-baseline gap-3">
@@ -115,7 +151,7 @@ function ProductDetail() {
           <p className="mt-1 text-sm text-muted-foreground">Excludes VAT. Free delivery over R5 000.</p>
 
           <ul className="mt-7 space-y-2.5">
-            {product.highlights.map((h) => (
+            {(product.highlights || []).map((h: string) => (
               <li key={h} className="flex items-start gap-2.5 text-sm">
                 <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                 {h}
@@ -179,7 +215,7 @@ function ProductDetail() {
           <TabsContent value="overview" className="pt-6">
             <p className="max-w-3xl leading-relaxed text-muted-foreground">{product.description}</p>
             <div className="mt-6 flex flex-wrap gap-2">
-              {product.useCases.map((u) => (
+              {(product.useCases || []).map((u: string) => (
                 <Badge key={u} variant="secondary">
                   {u}
                 </Badge>
@@ -188,7 +224,7 @@ function ProductDetail() {
           </TabsContent>
           <TabsContent value="specs" className="pt-6">
             <dl className="max-w-3xl divide-y divide-border rounded-2xl border border-border/70">
-              {product.specs.map((s) => (
+              {(product.specs || []).map((s: any) => (
                 <div key={s.label} className="grid gap-1 px-5 py-4 sm:grid-cols-3">
                   <dt className="text-sm font-medium text-muted-foreground">{s.label}</dt>
                   <dd className="text-sm sm:col-span-2">{s.value}</dd>
@@ -221,7 +257,7 @@ function ProductDetail() {
           <Separator className="mb-12" />
           <h2 className="font-display text-2xl font-bold">Related hardware</h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((p) => (
+            {related.map((p: any) => (
               <ProductCard key={p.slug} product={p} />
             ))}
           </div>

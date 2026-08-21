@@ -1,7 +1,19 @@
 import * as React from "react";
-import { products, type Product } from "./catalog";
+import { useQuery } from "@tanstack/react-query";
 
 export type CartLine = { slug: string; qty: number };
+
+type Product = {
+  slug: string;
+  name: string;
+  model: string;
+  price: number;
+  compareAt?: number;
+  stock: number;
+  rating: number;
+  reviews: number;
+  [key: string]: any;
+};
 
 type CartContextValue = {
   lines: CartLine[];
@@ -26,6 +38,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = React.useState<CartLine[]>([]);
   const [onAddToCart, setOnAddToCart] = React.useState<(() => void) | undefined>();
 
+  // Fetch products from API
+  const { data: products = [] } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await fetch('/api/products/list');
+      if (!response.ok) return [];
+      return response.json();
+    },
+    staleTime: 5000,
+  });
+
   React.useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -46,7 +69,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const value = React.useMemo<CartContextValue>(() => {
     const items = lines
       .map((line) => {
-        const product = products.find((p) => p.slug === line.slug);
+        const product = products.find((p: Product) => p.slug === line.slug);
         return product ? { product, qty: line.qty } : null;
       })
       .filter((v): v is { product: Product; qty: number } => v !== null);
@@ -84,7 +107,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       onAddToCart,
       setOnAddToCart: (callback) => setOnAddToCart(() => callback),
     };
-  }, [lines, onAddToCart]);
+  }, [lines, products, onAddToCart]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
