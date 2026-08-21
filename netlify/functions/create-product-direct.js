@@ -1,6 +1,6 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
-exports.handler = async (event, context) => {
+export async function handler(event, context) {
   console.log("[Direct] Function called, method:", event.httpMethod);
   
   // Only allow POST
@@ -13,10 +13,24 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
-
+  
+  let data;
   try {
-    const data = JSON.parse(event.body || '{}');
-    console.log("[Direct] Raw product data:", JSON.stringify(data, null, 2));
+    data = JSON.parse(event.body || '{}');
+  } catch (parseError) {
+    console.error("[Direct] Failed to parse request body:", parseError);
+    return {
+      statusCode: 400,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ error: 'Invalid JSON in request body' })
+    };
+  }
+
+  console.log("[Direct] Raw product data:", JSON.stringify(data, null, 2));
+  
+  try {
 
     // Check environment variables - try both prefixed and non-prefixed
     const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -134,4 +148,4 @@ exports.handler = async (event, context) => {
       })
     };
   }
-};
+}
