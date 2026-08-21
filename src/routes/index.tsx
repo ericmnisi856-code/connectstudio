@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   Cloud,
@@ -14,7 +15,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
-import { categories, products } from "@/lib/catalog";
+import { categories } from "@/lib/catalog";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 
 export const Route = createFileRoute("/")({
@@ -68,7 +69,27 @@ const verticals = [
 ];
 
 function Home() {
-  const featured = products.filter((p) => p.badge).slice(0, 4);
+  // Fetch products from API
+  const { data: products = [] } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await fetch('/api/products/list');
+      if (!response.ok) return [];
+      return response.json();
+    },
+    staleTime: 30000, // Cache for 30 seconds
+  });
+
+  // Get the 4 most recently added products
+  const featured = products
+    .sort((a: any, b: any) => {
+      // Sort by createdAt descending (newest first)
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    })
+    .slice(0, 4);
+  
   const productSection = useScrollAnimation();
   const featuredSection = useScrollAnimation();
   const verticalSection = useScrollAnimation();
@@ -213,12 +234,18 @@ function Home() {
         >
           <h2 className="font-display text-3xl font-bold sm:text-4xl">Featured hardware</h2>
           <p className="mt-2 text-muted-foreground">
-            The models our engineers specify most often this quarter.
+            Our newest arrivals — just added to the catalogue.
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {featured.map((p) => (
-              <ProductCard key={p.slug} product={p} />
-            ))}
+            {featured.length > 0 ? (
+              featured.map((p: any) => (
+                <ProductCard key={p.slug} product={p} />
+              ))
+            ) : (
+              <p className="col-span-full text-center text-muted-foreground">
+                No products available yet. Add some in the admin panel!
+              </p>
+            )}
           </div>
         </div>
       </section>
