@@ -56,9 +56,17 @@ function AdminPage() {
     queryFn: () => fetchOrders(),
     enabled: adminQuery.data?.isAdmin === true,
   });
+  
+  // Fetch products from Netlify Blobs API
   const productsQuery = useQuery({
     queryKey: ["products"],
-    queryFn: () => fetchProducts(),
+    queryFn: async () => {
+      const response = await fetch('/api/products/list');
+      if (!response.ok) {
+        throw new Error('Failed to fetch products');
+      }
+      return response.json();
+    },
     enabled: adminQuery.data?.isAdmin === true,
   });
 

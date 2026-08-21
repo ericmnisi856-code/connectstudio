@@ -42,7 +42,8 @@ export function NewProductManager({ products, onRefresh }: NewProductManagerProp
     }
 
     try {
-      const response = await fetch('/.netlify/functions/delete-product-direct', {
+      // Use Netlify Blobs API for delete
+      const response = await fetch('/api/products/delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +52,8 @@ export function NewProductManager({ products, onRefresh }: NewProductManagerProp
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to delete product: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to delete product: ${response.statusText}`);
       }
 
       toast.success(`"${product.name}" deleted successfully`);
