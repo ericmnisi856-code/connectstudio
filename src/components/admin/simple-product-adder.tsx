@@ -111,17 +111,13 @@ export function SimpleProductAdder({ onProductAdded }: SimpleProductAdderProps) 
           </div>
           <div>
             <Label htmlFor="quick-category">Category *</Label>
-            <select
+            <Input
               id="quick-category"
               name="category"
               required
-              className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            >
-              <option value="">Select category</option>
-              <option value="eg">EG Series Gateways</option>
-              <option value="wireless">Wireless Routers</option>
-              <option value="nbr">NBR Security Routers</option>
-            </select>
+              placeholder="e.g. switches, routers, access-points"
+              className="mt-1.5"
+            />
           </div>
           <div>
             <Label htmlFor="quick-price">Price (ZAR) *</Label>

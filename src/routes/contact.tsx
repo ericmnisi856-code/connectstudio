@@ -51,9 +51,25 @@ function ContactPage() {
       return;
     }
     setErrors({});
-    setSent(true);
-    toast.success("Enquiry received — we'll reply within one business day.");
-    e.currentTarget.reset();
+    
+    // Submit to Netlify Forms (will forward to accounts@connectstudio.co.za)
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        'form-name': 'contact',
+        ...data as any
+      }).toString()
+    })
+      .then(() => {
+        setSent(true);
+        toast.success("Enquiry received — we'll reply within one business day.");
+        e.currentTarget.reset();
+      })
+      .catch((error) => {
+        console.error('Form submission error:', error);
+        toast.error("Failed to send message. Please email us directly at accounts@connectstudio.co.za");
+      });
   }
 
   return (
@@ -77,7 +93,20 @@ function ContactPage() {
       </section>
 
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_20rem] lg:px-8">
-        <form onSubmit={onSubmit} className="rounded-2xl border border-border/70 bg-card p-8" noValidate>
+        <form 
+          onSubmit={onSubmit} 
+          className="rounded-2xl border border-border/70 bg-card p-8" 
+          noValidate
+          name="contact"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+        >
+          {/* Netlify form detection */}
+          <input type="hidden" name="form-name" value="contact" />
+          {/* Honeypot field for spam protection */}
+          <input type="hidden" name="bot-field" />
+          
           <div className="grid gap-5 sm:grid-cols-2">
             <Field id="name" label="Full name" error={errors["name"]} />
             <Field id="email" label="Email" type="email" error={errors["email"]} />

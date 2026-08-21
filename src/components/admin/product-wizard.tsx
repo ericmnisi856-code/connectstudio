@@ -303,17 +303,16 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
               
               <div>
                 <Label htmlFor="category">Category *</Label>
-                <select
+                <Input
                   id="category"
                   value={productData.category}
                   onChange={(e) => updateData('category', e.target.value)}
-                  className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  <option value="">Select category</option>
-                  <option value="eg">EG Series Gateways</option>
-                  <option value="wireless">Wireless Routers</option>
-                  <option value="nbr">NBR Security Routers</option>
-                </select>
+                  placeholder="e.g. switches, routers, access-points"
+                  className="mt-1.5"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Enter any category name
+                </p>
               </div>
             </div>
 
