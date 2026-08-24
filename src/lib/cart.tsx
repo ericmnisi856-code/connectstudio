@@ -75,7 +75,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       .filter((v): v is { product: Product; qty: number } => v !== null);
 
     const subtotal = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
-    const vat = Math.round(subtotal * 0.15);
+    const vat = 350; // Standard VAT charge
     const shipping = subtotal === 0 || subtotal > 5000 ? 0 : 350;
 
     return {

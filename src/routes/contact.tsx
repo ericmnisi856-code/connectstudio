@@ -136,7 +136,6 @@ ${data.message}
           {[
             { icon: Phone, title: "Sales", body: "076 676 8658", link: "tel:+27766768658" },
             { icon: Mail, title: "Email", body: "accounts@connectstudio.co.za", link: "mailto:accounts@connectstudio.co.za" },
-            { icon: MapPin, title: "Office", body: "14 Empire Road, Parktown, Johannesburg", link: null },
           ].map((c) => (
             <div key={c.title} className="rounded-2xl border border-border/70 bg-surface p-6">
               <c.icon className="size-5 text-primary" aria-hidden="true" />

@@ -353,8 +353,13 @@ function OrderSummary() {
       <Separator className="my-5" />
       <dl className="space-y-3 text-sm">
         <Row label="Subtotal" value={formatZAR(subtotal)} />
-        <Row label="VAT (15%)" value={formatZAR(vat)} />
-        <Row label="Delivery" value={shipping === 0 ? "Free" : formatZAR(shipping)} />
+        <Row label="VAT (Standard)" value={formatZAR(vat)} />
+        <Row label="Shipping" value={shipping === 0 ? "Free" : formatZAR(shipping)} />
+        <div className="mt-2 text-xs text-muted-foreground">
+          <p>• Standard shipping: R80 (2-3 business days)</p>
+          <p>• Express shipping: R90 (1-2 business days)</p>
+          <p>• Local Pick Up (Gauteng - Head Office)</p>
+        </div>
       </dl>
       <Separator className="my-5" />
       <div className="flex items-baseline justify-between">

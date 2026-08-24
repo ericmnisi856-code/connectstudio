@@ -52,8 +52,29 @@ export const createYocoCheckout = createServerFn({ method: "POST" })
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("[Yoco] API Error:", response.status, errorText);
-        throw new Error(`Yoco API error: ${response.status} ${response.statusText}`);
+        console.error("[Yoco] API Error Response:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+          url: response.url,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        let errorMessage = `Yoco API error: ${response.status} ${response.statusText}`;
+        try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.message || errorJson.error) {
+            errorMessage = `Yoco: ${errorJson.message || errorJson.error}`;
+          }
+          console.error("[Yoco] Parsed error:", errorJson);
+        } catch {
+          // Not JSON, use raw text
+          if (errorText) {
+            errorMessage = `Yoco: ${errorText.substring(0, 200)}`;
+          }
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
