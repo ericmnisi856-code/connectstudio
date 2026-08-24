@@ -17,7 +17,19 @@ const createCheckoutSchema = z.object({
 export const createYocoCheckout = createServerFn({ method: "POST" })
   .validator((input: unknown) => createCheckoutSchema.parse(input))
   .handler(async ({ data }) => {
-    const secretKey = process.env["YOCO_SECRET_KEY"];
+    // Try multiple environment variable formats
+    const secretKey = process.env["YOCO_SECRET_KEY"] || 
+                     process.env["VITE_YOCO_SECRET_KEY"] ||
+                     import.meta.env?.YOCO_SECRET_KEY;
+    
+    console.log("[Yoco] Secret key check:", {
+      hasKey: !!secretKey,
+      keyPrefix: secretKey ? secretKey.substring(0, 8) + '...' : 'missing',
+      envVars: {
+        YOCO_SECRET_KEY: !!process.env["YOCO_SECRET_KEY"],
+        VITE_YOCO_SECRET_KEY: !!process.env["VITE_YOCO_SECRET_KEY"],
+      }
+    });
     
     if (!secretKey) {
       throw new Error("Yoco secret key not configured on server");
