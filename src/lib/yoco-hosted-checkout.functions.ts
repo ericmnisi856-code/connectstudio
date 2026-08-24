@@ -26,9 +26,16 @@ export const createYocoCheckout = createServerFn({ method: "POST" })
     const baseUrl = process.env["VITE_APP_URL"] || "http://localhost:8081";
 
     try {
+      // Generate a short unique order reference (max 50 chars for Yoco)
+      // Format: ORDER-{timestamp}-{random} = ORDER-1234567890123-ABC (max 23 chars)
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
+      const orderReference = `ORDER-${timestamp}-${randomSuffix}`;
+
       console.log("[Yoco] Creating checkout session:", {
         amount: data.amountInCents,
         currency: "ZAR",
+        orderReference,
       });
 
       const response = await fetch("https://payments.yoco.com/api/checkouts", {
@@ -40,12 +47,14 @@ export const createYocoCheckout = createServerFn({ method: "POST" })
         body: JSON.stringify({
           amount: data.amountInCents,
           currency: "ZAR",
+          orderReference: orderReference,
           successUrl: `${baseUrl}/checkout/success`,
           cancelUrl: `${baseUrl}/checkout`,
           failureUrl: `${baseUrl}/checkout`,
           metadata: {
             ...data.metadata,
             source: "studio-connect-shop",
+            orderRef: orderReference,
           },
         }),
       });
@@ -53,19 +62,33 @@ export const createYocoCheckout = createServerFn({ method: "POST" })
       if (!response.ok) {
         const errorText = await response.text();
         console.error("[Yoco] API Error:", response.status, errorText);
-        throw new Error(`Yoco API error: ${response.status} ${response.statusText}`);
+        
+        // Parse error details if available
+        let errorMessage = `Yoco API error: ${response.status}`;
+        try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.message) {
+            errorMessage = errorJson.message;
+          }
+        } catch {
+          errorMessage += ` ${response.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
       
       console.log("[Yoco] Checkout session created:", {
         id: result.id,
+        orderReference,
         redirectUrl: result.redirectUrl,
       });
 
       return {
         success: true,
         checkoutId: result.id,
+        orderReference,
         redirectUrl: result.redirectUrl,
       };
     } catch (error) {
