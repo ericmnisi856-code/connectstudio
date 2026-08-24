@@ -3,12 +3,14 @@ import { useServerFn } from "@tanstack/react-start";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowLeft, ShieldCheck, Package, Zap, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Form,
   FormControl,
@@ -23,7 +25,7 @@ import { ProductVisual } from "@/components/product-visual";
 import { YocoHostedPaymentButton } from "@/components/yoco-hosted-payment-button";
 import { YocoLogo } from "@/components/yoco-logo";
 import { formatZAR } from "@/lib/catalog";
-import { useCart } from "@/lib/cart";
+import { useCart, type ShippingMethod } from "@/lib/cart";
 import { buildOrderItems, generateOrderId } from "@/lib/orders";
 import { placeOrder } from "@/lib/orders.functions";
 
@@ -59,7 +61,7 @@ export const Route = createFileRoute("/checkout/")({
 });
 
 function CheckoutFormPage() {
-  const { items, subtotal, vat, shipping, total, clear } = useCart();
+  const { items, subtotal, vat, shipping, shippingMethod, setShippingMethod, total, clear } = useCart();
   const navigate = useNavigate();
   const submitOrder = useServerFn(placeOrder);
   const [isProcessingOrder, setIsProcessingOrder] = React.useState(false);
@@ -254,6 +256,62 @@ function CheckoutFormPage() {
             </section>
 
             <section className="rounded-2xl border border-border/70 bg-card p-6 sm:p-8">
+              <h2 className="font-display text-xl font-semibold">Shipping method</h2>
+              <RadioGroup value={shippingMethod} onValueChange={(value) => setShippingMethod(value as ShippingMethod)} className="mt-6 space-y-3">
+                <div 
+                  className={`relative flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-colors ${
+                    shippingMethod === 'standard' ? 'border-primary bg-primary/5' : 'border-border/70 hover:border-border'
+                  }`}
+                  onClick={() => setShippingMethod('standard')}
+                >
+                  <RadioGroupItem value="standard" id="standard" className="mt-1" />
+                  <Label htmlFor="standard" className="flex-1 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Package className="size-5 text-primary" />
+                      <span className="font-semibold">Standard shipping</span>
+                      <span className="ml-auto text-sm font-semibold">{formatZAR(80)}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">2-3 business days</p>
+                  </Label>
+                </div>
+
+                <div 
+                  className={`relative flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-colors ${
+                    shippingMethod === 'express' ? 'border-primary bg-primary/5' : 'border-border/70 hover:border-border'
+                  }`}
+                  onClick={() => setShippingMethod('express')}
+                >
+                  <RadioGroupItem value="express" id="express" className="mt-1" />
+                  <Label htmlFor="express" className="flex-1 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <Zap className="size-5 text-primary" />
+                      <span className="font-semibold">Express shipping</span>
+                      <span className="ml-auto text-sm font-semibold">{formatZAR(90)}</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">1-2 business days</p>
+                  </Label>
+                </div>
+
+                <div 
+                  className={`relative flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 transition-colors ${
+                    shippingMethod === 'pickup' ? 'border-primary bg-primary/5' : 'border-border/70 hover:border-border'
+                  }`}
+                  onClick={() => setShippingMethod('pickup')}
+                >
+                  <RadioGroupItem value="pickup" id="pickup" className="mt-1" />
+                  <Label htmlFor="pickup" className="flex-1 cursor-pointer">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="size-5 text-primary" />
+                      <span className="font-semibold">Local Pick Up (Gauteng - Head Office)</span>
+                      <span className="ml-auto text-sm font-semibold text-green-600">FREE</span>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">Collect from our Johannesburg office</p>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </section>
+
+            <section className="rounded-2xl border border-border/70 bg-card p-6 sm:p-8">
               <h2 className="font-display text-xl font-semibold">Additional information</h2>
               <div className="mt-6">
                 <FormField
@@ -355,11 +413,6 @@ function OrderSummary() {
         <Row label="Subtotal" value={formatZAR(subtotal)} />
         <Row label="VAT (Standard)" value={formatZAR(vat)} />
         <Row label="Shipping" value={shipping === 0 ? "Free" : formatZAR(shipping)} />
-        <div className="mt-2 text-xs text-muted-foreground">
-          <p>• Standard shipping: R80 (2-3 business days)</p>
-          <p>• Express shipping: R90 (1-2 business days)</p>
-          <p>• Local Pick Up (Gauteng - Head Office)</p>
-        </div>
       </dl>
       <Separator className="my-5" />
       <div className="flex items-baseline justify-between">

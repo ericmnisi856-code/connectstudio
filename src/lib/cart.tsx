@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 
 export type CartLine = { slug: string; qty: number };
 
+export type ShippingMethod = 'standard' | 'express' | 'pickup';
+
 type Product = {
   slug: string;
   name: string;
@@ -22,6 +24,8 @@ type CartContextValue = {
   subtotal: number;
   vat: number;
   shipping: number;
+  shippingMethod: ShippingMethod;
+  setShippingMethod: (method: ShippingMethod) => void;
   total: number;
   add: (slug: string, qty?: number) => void;
   setQty: (slug: string, qty: number) => void;
@@ -33,9 +37,11 @@ type CartContextValue = {
 
 const CartContext = React.createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "studio-connect-cart";
+const SHIPPING_METHOD_KEY = "studio-connect-shipping-method";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = React.useState<CartLine[]>([]);
+  const [shippingMethod, setShippingMethodState] = React.useState<ShippingMethod>('standard');
   const [onAddToCart, setOnAddToCart] = React.useState<(() => void) | undefined>();
 
   // Fetch products from API
@@ -53,6 +59,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) setLines(JSON.parse(raw) as CartLine[]);
+      
+      const savedMethod = window.localStorage.getItem(SHIPPING_METHOD_KEY) as ShippingMethod | null;
+      if (savedMethod) setShippingMethodState(savedMethod);
     } catch {
       /* ignore */
     }
@@ -66,6 +75,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [lines]);
 
+  React.useEffect(() => {
+    try {
+      window.localStorage.setItem(SHIPPING_METHOD_KEY, shippingMethod);
+    } catch {
+      /* ignore */
+    }
+  }, [shippingMethod]);
+
   const value = React.useMemo<CartContextValue>(() => {
     const items = lines
       .map((line) => {
@@ -76,7 +93,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const subtotal = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
     const vat = 350; // Standard VAT charge
-    const shipping = subtotal === 0 || subtotal > 5000 ? 0 : 350;
+    
+    // Calculate shipping based on selected method
+    let shipping = 0;
+    if (subtotal > 0) {
+      switch (shippingMethod) {
+        case 'standard':
+          shipping = 80;
+          break;
+        case 'express':
+          shipping = 90;
+          break;
+        case 'pickup':
+          shipping = 0;
+          break;
+      }
+    }
 
     return {
       lines,
@@ -85,6 +117,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       subtotal,
       vat,
       shipping,
+      shippingMethod,
+      setShippingMethod: setShippingMethodState,
       total: subtotal + vat + shipping,
       add: (slug, qty = 1) => {
         setLines((prev) => {
@@ -107,7 +141,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       onAddToCart,
       setOnAddToCart: (callback) => setOnAddToCart(() => callback),
     };
-  }, [lines, products, onAddToCart]);
+  }, [lines, products, shippingMethod, onAddToCart]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
