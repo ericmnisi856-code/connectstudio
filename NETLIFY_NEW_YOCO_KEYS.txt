@@ -1,0 +1,40 @@
+================================================================================
+UPDATE NETLIFY ENVIRONMENT VARIABLES WITH YOUR NEW YOCO KEYS
+================================================================================
+
+Go to: Netlify Dashboard → Your Site → Site settings → Environment variables
+
+UPDATE THESE TWO VARIABLES:
+
+1. YOCO_SECRET_KEY
+   Value: [Your Yoco secret key - starts with sk_live_]
+
+2. VITE_YOCO_PUBLIC_KEY
+   Value: [Your Yoco public key - starts with pk_live_]
+
+================================================================================
+IMPORTANT: Get your actual keys from:
+================================================================================
+
+- Check your .env file locally (not committed to Git for security)
+- Or get them from your Yoco Portal: https://portal.yoco.com/online/settings/api-keys
+
+================================================================================
+AFTER UPDATING:
+================================================================================
+
+1. Click "Save" in Netlify
+2. Go to: Deploys → Trigger deploy → Deploy site
+3. Wait for deployment to complete
+4. Test a payment on your live site
+
+================================================================================
+VERIFICATION:
+================================================================================
+
+✅ Check your Yoco Portal (portal.yoco.com) for incoming payments
+✅ Test with a real card (small amount like R10)
+✅ Verify payment appears in your Yoco dashboard
+✅ Check that money goes to your correct bank account
+
+================================================================================
