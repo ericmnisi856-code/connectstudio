@@ -155,7 +155,10 @@ export function ProductManagement({
                     variant="outline"
                     size="sm"
                     className="flex-1"
-                    onClick={() => setSelectedProduct(product)}
+                    onClick={() => {
+                      console.log("🖱️ EDIT BUTTON CLICKED - Product:", product);
+                      setSelectedProduct(product);
+                    }}
                   >
                     <Pencil className="mr-1 size-3" />
                     Edit
@@ -231,7 +234,15 @@ function ProductForm({
 
   // Update ALL form state when product changes (for edit mode)
   React.useEffect(() => {
+    console.log("🔄 PRODUCT FORM EFFECT TRIGGERED");
+    console.log("📦 Product received:", product);
+    
     if (product) {
+      console.log("✅ POPULATING FORM WITH PRODUCT DATA:");
+      console.log("  Name:", product.name);
+      console.log("  Model:", product.model);
+      console.log("  Price:", product.price);
+      
       setName(product.name || "");
       setModel(product.model || "");
       setSlug(product.slug || "");
@@ -248,7 +259,10 @@ function ProductForm({
       setUseCases(product.useCases || [""]);
       setSpecs(product.specs || [{ label: "", value: "" }]);
       setImagePreview(product.image || null);
+      
+      console.log("✅ FORM STATE UPDATED - Fields should now show data");
     } else {
+      console.log("🆕 CREATE MODE - Resetting form");
       // Reset for create mode
       setName("");
       setModel("");
