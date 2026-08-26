@@ -29,7 +29,8 @@ interface ProductData {
   
   // Step 3: Advanced
   badge?: string;
-  image?: string;
+  image?: string; // Primary image (kept for backward compatibility)
+  images?: string[]; // Array of all images (up to 5)
   rating: number;
   reviews: number;
 }
@@ -38,7 +39,11 @@ export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardPro
   const [currentStep, setCurrentStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
   const [uploadingImage, setUploadingImage] = React.useState(false);
-  const [imagePreview, setImagePreview] = React.useState<string | null>(product?.image || null);
+  
+  // Support multiple images (up to 5)
+  const [imagePreviews, setImagePreviews] = React.useState<string[]>(
+    product?.images || (product?.image ? [product.image] : [])
+  );
   
   // Initialize with product data if editing, otherwise empty
   const [productData, setProductData] = React.useState<ProductData>({
@@ -55,6 +60,7 @@ export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardPro
     reviews: product?.reviews || 0,
     badge: product?.badge || '',
     image: product?.image || '',
+    images: product?.images || (product?.image ? [product.image] : []),
   });
 
   const isEditMode = !!product;
@@ -84,71 +90,96 @@ export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardPro
     }
   }, [productData.name, productData.slug]);
 
-  React.useEffect(() => {
-    // Set preview if image URL exists
-    if (productData.image) {
-      setImagePreview(productData.image);
-    }
-  }, [productData.image]);
-
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error('Invalid file type. Only JPG, PNG, WebP and GIF are allowed.');
+    // Check if adding these files would exceed the limit of 5
+    if (imagePreviews.length + files.length > 5) {
+      toast.error('You can only upload up to 5 images per product');
       return;
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      toast.error('File too large. Maximum size is 5MB.');
-      return;
+    // Validate each file
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`Invalid file type for ${file.name}. Only JPG, PNG, WebP and GIF are allowed.`);
+        return;
+      }
+      if (file.size > maxSize) {
+        toast.error(`${file.name} is too large. Maximum size is 5MB.`);
+        return;
+      }
     }
 
     setUploadingImage(true);
 
     try {
-      // Show preview immediately
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const uploadedUrls: string[] = [];
+      
+      // Upload each file
+      for (const file of files) {
+        // Show preview immediately
+        const reader = new FileReader();
+        const previewPromise = new Promise<string>((resolve) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+        
+        const preview = await previewPromise;
+        setImagePreviews(prev => [...prev, preview]);
 
-      // Upload to server
-      const formData = new FormData();
-      formData.append('image', file);
+        // Upload to server
+        const formData = new FormData();
+        formData.append('image', file);
 
-      const response = await fetch('/api/upload-image', {
-        method: 'POST',
-        body: formData,
-      });
+        const response = await fetch('/api/upload-image', {
+          method: 'POST',
+          body: formData,
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to upload image');
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to upload image');
+        }
+
+        const result = await response.json();
+        uploadedUrls.push(result.url);
       }
 
-      const result = await response.json();
-      updateData('image', result.url);
-      toast.success('Image uploaded successfully!');
+      // Update product data with all images
+      const newImages = [...(productData.images || []), ...uploadedUrls];
+      setProductData(prev => ({
+        ...prev,
+        images: newImages,
+        image: newImages[0], // First image is primary
+      }));
+      
+      toast.success(`${files.length} image(s) uploaded successfully!`);
 
     } catch (error: any) {
       console.error('[ImageUpload] Error:', error);
       toast.error(error.message || 'Failed to upload image');
-      setImagePreview(null);
     } finally {
       setUploadingImage(false);
     }
   };
 
-  const removeImage = () => {
-    updateData('image', '');
-    setImagePreview(null);
+  const removeImage = (index: number) => {
+    const newImages = imagePreviews.filter((_, i) => i !== index);
+    const newImageUrls = (productData.images || []).filter((_, i) => i !== index);
+    
+    setImagePreviews(newImages);
+    setProductData(prev => ({
+      ...prev,
+      images: newImageUrls,
+      image: newImageUrls[0] || '', // First image becomes primary
+    }));
+    
+    toast.success('Image removed');
   };
 
   const validateStep1 = () => {
@@ -185,7 +216,7 @@ export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardPro
     setLoading(true);
     
     try {
-      // Create clean product object using the EXACT SAME pattern as the working shop page
+      // Create clean product object including the images array
       const cleanProduct = {
         slug: productData.slug.trim(),
         name: productData.name.trim(),
@@ -199,7 +230,8 @@ export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardPro
         rating: productData.rating,
         reviews: productData.reviews,
         badge: productData.badge?.trim() || null,
-        image: productData.image?.trim() || null,
+        image: productData.images?.[0] || productData.image?.trim() || null, // Primary image (first in array)
+        images: productData.images || [], // All images array
         highlights: product?.highlights || [], // Preserve existing or empty array
         specs: product?.specs || [], // Preserve existing or empty array  
         useCases: product?.useCases || [], // Preserve existing or empty array
@@ -418,49 +450,70 @@ export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardPro
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Advanced Settings</h3>
             
-            {/* Image Upload Section */}
+            {/* Image Upload Section - Multiple Images */}
             <div>
-              <Label htmlFor="image-upload">Product Image</Label>
+              <Label htmlFor="image-upload">Product Images (Up to 5)</Label>
+              <p className="text-xs text-muted-foreground mt-1 mb-2">
+                Upload up to 5 images. The first image will be the primary display image.
+              </p>
+              
               <div className="mt-2 space-y-3">
-                {imagePreview ? (
-                  <div className="relative w-full max-w-md">
-                    <img
-                      src={imagePreview}
-                      alt="Product preview"
-                      className="w-full h-48 object-cover rounded-lg border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-2 right-2"
-                      onClick={removeImage}
-                      disabled={uploadingImage}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Remove
-                    </Button>
+                {/* Display existing images in a grid */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={preview}
+                          alt={`Product image ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg border"
+                        />
+                        {index === 0 && (
+                          <div className="absolute top-2 left-2 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
+                            Primary
+                          </div>
+                        )}
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeImage(index)}
+                          disabled={uploadingImage}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                ) : (
+                )}
+                
+                {/* Upload button - only show if less than 5 images */}
+                {imagePreviews.length < 5 && (
                   <div className="flex items-center justify-center w-full">
                     <label
                       htmlFor="image-upload"
-                      className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted transition-colors"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted transition-colors"
                     >
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         {uploadingImage ? (
                           <>
                             <Loader2 className="w-10 h-10 mb-3 text-muted-foreground animate-spin" />
-                            <p className="text-sm text-muted-foreground">Uploading image...</p>
+                            <p className="text-sm text-muted-foreground">Uploading images...</p>
                           </>
                         ) : (
                           <>
-                            <Package className="w-10 h-10 mb-3 text-muted-foreground" />
-                            <p className="mb-2 text-sm text-muted-foreground">
+                            <Package className="w-8 h-8 mb-2 text-muted-foreground" />
+                            <p className="mb-1 text-sm text-muted-foreground">
                               <span className="font-semibold">Click to upload</span> or drag and drop
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              PNG, JPG, WebP or GIF (MAX. 5MB)
+                              {imagePreviews.length > 0 
+                                ? `Add ${5 - imagePreviews.length} more image(s)`
+                                : 'Upload up to 5 images'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PNG, JPG, WebP or GIF (MAX. 5MB each)
                             </p>
                           </>
                         )}
@@ -472,6 +525,7 @@ export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardPro
                         accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                         onChange={handleImageUpload}
                         disabled={uploadingImage}
+                        multiple
                       />
                     </label>
                   </div>
