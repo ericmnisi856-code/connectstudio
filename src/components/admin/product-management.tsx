@@ -203,6 +203,20 @@ function ProductForm({
   product?: Product;
   onSubmit: (data: ProductFormData) => void;
 }) {
+  // ALL form fields as controlled state
+  const [name, setName] = React.useState(product?.name || "");
+  const [model, setModel] = React.useState(product?.model || "");
+  const [slug, setSlug] = React.useState(product?.slug || "");
+  const [category, setCategory] = React.useState(product?.category || "");
+  const [tagline, setTagline] = React.useState(product?.tagline || "");
+  const [description, setDescription] = React.useState(product?.description || "");
+  const [price, setPrice] = React.useState(product?.price?.toString() || "");
+  const [compareAt, setCompareAt] = React.useState(product?.compareAt?.toString() || "");
+  const [stock, setStock] = React.useState(product?.stock?.toString() || "");
+  const [badge, setBadge] = React.useState(product?.badge || "");
+  const [rating, setRating] = React.useState(product?.rating?.toString() || "");
+  const [reviews, setReviews] = React.useState(product?.reviews?.toString() || "");
+  
   const [highlights, setHighlights] = React.useState<string[]>(
     product?.highlights || [""]
   );
@@ -213,24 +227,46 @@ function ProductForm({
     product?.specs || [{ label: "", value: "" }]
   );
   const [imagePreview, setImagePreview] = React.useState<string | null>(product?.image || null);
-  const [imageFile, setImageFile] = React.useState<File | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Update form state when product changes (for edit mode)
+  // Update ALL form state when product changes (for edit mode)
   React.useEffect(() => {
     if (product) {
+      setName(product.name || "");
+      setModel(product.model || "");
+      setSlug(product.slug || "");
+      setCategory(product.category || "");
+      setTagline(product.tagline || "");
+      setDescription(product.description || "");
+      setPrice(product.price?.toString() || "");
+      setCompareAt(product.compareAt?.toString() || "");
+      setStock(product.stock?.toString() || "");
+      setBadge(product.badge || "");
+      setRating(product.rating?.toString() || "");
+      setReviews(product.reviews?.toString() || "");
       setHighlights(product.highlights || [""]);
       setUseCases(product.useCases || [""]);
       setSpecs(product.specs || [{ label: "", value: "" }]);
       setImagePreview(product.image || null);
     } else {
       // Reset for create mode
+      setName("");
+      setModel("");
+      setSlug("");
+      setCategory("");
+      setTagline("");
+      setDescription("");
+      setPrice("");
+      setCompareAt("");
+      setStock("");
+      setBadge("");
+      setRating("");
+      setReviews("");
       setHighlights([""]);
       setUseCases([""]);
       setSpecs([{ label: "", value: "" }]);
       setImagePreview(null);
     }
-    setImageFile(null);
   }, [product]);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -240,7 +276,6 @@ function ProductForm({
         toast.error("Image must be less than 5MB");
         return;
       }
-      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -250,7 +285,6 @@ function ProductForm({
   }
 
   function handleRemoveImage() {
-    setImageFile(null);
     setImagePreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -259,24 +293,20 @@ function ProductForm({
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    
-    const compareAtValue = formData.get("compareAt");
-    const badgeValue = formData.get("badge");
     
     const data: ProductFormData = {
-      slug: formData.get("slug") as string,
-      name: formData.get("name") as string,
-      model: formData.get("model") as string,
-      category: formData.get("category") as any,
-      tagline: formData.get("tagline") as string,
-      description: formData.get("description") as string,
-      price: Number(formData.get("price")),
-      compareAt: compareAtValue ? Number(compareAtValue) : undefined,
-      stock: Number(formData.get("stock")),
-      rating: Number(formData.get("rating")),
-      reviews: Number(formData.get("reviews")),
-      badge: badgeValue && badgeValue !== "" ? (badgeValue as string) : undefined,
+      slug: slug,
+      name: name,
+      model: model,
+      category: category as any,
+      tagline: tagline,
+      description: description,
+      price: Number(price),
+      compareAt: compareAt ? Number(compareAt) : undefined,
+      stock: Number(stock),
+      rating: Number(rating),
+      reviews: Number(reviews),
+      badge: badge && badge !== "" ? badge : undefined,
       highlights: highlights.filter((h) => h.trim()),
       specs: specs.filter((s) => s.label.trim() && s.value.trim()),
       useCases: useCases.filter((u) => u.trim()),
@@ -343,7 +373,8 @@ function ProductForm({
           <Input
             id="name"
             name="name"
-            defaultValue={product?.name}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             className="mt-1.5"
           />
@@ -353,7 +384,8 @@ function ProductForm({
           <Input
             id="model"
             name="model"
-            defaultValue={product?.model}
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
             required
             className="mt-1.5"
           />
@@ -363,7 +395,8 @@ function ProductForm({
           <Input
             id="slug"
             name="slug"
-            defaultValue={product?.slug}
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
             required
             className="mt-1.5"
             placeholder="rg-eg105g-v2"
@@ -371,7 +404,7 @@ function ProductForm({
         </div>
         <div>
           <Label htmlFor="category">Category *</Label>
-          <Select name="category" defaultValue={product?.category || undefined} required>
+          <Select name="category" value={category} onValueChange={setCategory} required>
             <SelectTrigger className="mt-1.5">
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
@@ -391,7 +424,8 @@ function ProductForm({
         <Input
           id="tagline"
           name="tagline"
-          defaultValue={product?.tagline}
+          value={tagline}
+          onChange={(e) => setTagline(e.target.value)}
           required
           className="mt-1.5"
         />
@@ -402,7 +436,8 @@ function ProductForm({
         <Textarea
           id="description"
           name="description"
-          defaultValue={product?.description}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           required
           rows={3}
           className="mt-1.5"
@@ -416,7 +451,8 @@ function ProductForm({
             id="price"
             name="price"
             type="number"
-            defaultValue={product?.price}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
             required
             className="mt-1.5"
           />
@@ -427,7 +463,8 @@ function ProductForm({
             id="compareAt"
             name="compareAt"
             type="number"
-            defaultValue={product?.compareAt}
+            value={compareAt}
+            onChange={(e) => setCompareAt(e.target.value)}
             className="mt-1.5"
           />
         </div>
@@ -437,7 +474,8 @@ function ProductForm({
             id="stock"
             name="stock"
             type="number"
-            defaultValue={product?.stock}
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
             required
             className="mt-1.5"
           />
@@ -447,7 +485,8 @@ function ProductForm({
           <Input
             id="badge"
             name="badge"
-            defaultValue={product?.badge}
+            value={badge}
+            onChange={(e) => setBadge(e.target.value)}
             className="mt-1.5"
           />
         </div>
@@ -463,7 +502,8 @@ function ProductForm({
             step="0.1"
             min="0"
             max="5"
-            defaultValue={product?.rating}
+            value={rating}
+            onChange={(e) => setRating(e.target.value)}
             required
             className="mt-1.5"
           />
@@ -474,7 +514,8 @@ function ProductForm({
             id="reviews"
             name="reviews"
             type="number"
-            defaultValue={product?.reviews}
+            value={reviews}
+            onChange={(e) => setReviews(e.target.value)}
             required
             className="mt-1.5"
           />
@@ -563,8 +604,10 @@ function ProductForm({
               value={spec.label}
               onChange={(e) => {
                 const newSpecs = [...specs];
-                newSpecs[i].label = e.target.value;
-                setSpecs(newSpecs);
+                if (newSpecs[i]) {
+                  newSpecs[i].label = e.target.value;
+                  setSpecs(newSpecs);
+                }
               }}
               placeholder="Label (e.g., Ports)"
               className="flex-1"
@@ -573,8 +616,10 @@ function ProductForm({
               value={spec.value}
               onChange={(e) => {
                 const newSpecs = [...specs];
-                newSpecs[i].value = e.target.value;
-                setSpecs(newSpecs);
+                if (newSpecs[i]) {
+                  newSpecs[i].value = e.target.value;
+                  setSpecs(newSpecs);
+                }
               }}
               placeholder="Value"
               className="flex-1"
