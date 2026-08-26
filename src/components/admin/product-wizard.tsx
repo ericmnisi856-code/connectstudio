@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { CheckCircle, Circle, ArrowRight, ArrowLeft, Package, Loader2, Trash2 } from "lucide-react";
 
 interface ProductWizardProps {
+  product?: any; // Product to edit (if editing existing product)
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -33,23 +34,30 @@ interface ProductData {
   reviews: number;
 }
 
-export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
+export function ProductWizard({ product, onSuccess, onCancel }: ProductWizardProps) {
   const [currentStep, setCurrentStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
   const [uploadingImage, setUploadingImage] = React.useState(false);
-  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const [imagePreview, setImagePreview] = React.useState<string | null>(product?.image || null);
+  
+  // Initialize with product data if editing, otherwise empty
   const [productData, setProductData] = React.useState<ProductData>({
-    name: '',
-    model: '',
-    slug: '',
-    category: '',
-    tagline: '',
-    description: '',
-    price: 0,
-    stock: 0,
-    rating: 4.5,
-    reviews: 0,
+    name: product?.name || '',
+    model: product?.model || '',
+    slug: product?.slug || '',
+    category: product?.category || '',
+    tagline: product?.tagline || '',
+    description: product?.description || '',
+    price: product?.price || 0,
+    compareAt: product?.compareAt,
+    stock: product?.stock || 0,
+    rating: product?.rating || 4.5,
+    reviews: product?.reviews || 0,
+    badge: product?.badge || '',
+    image: product?.image || '',
   });
+
+  const isEditMode = !!product;
 
   const steps = [
     { number: 1, title: 'Basic Info', description: 'Name, model, category' },
@@ -192,37 +200,42 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
         reviews: productData.reviews,
         badge: productData.badge?.trim() || null,
         image: productData.image?.trim() || null,
-        highlights: [], // Empty array
-        specs: [], // Empty array  
-        useCases: [], // Empty array
+        highlights: product?.highlights || [], // Preserve existing or empty array
+        specs: product?.specs || [], // Preserve existing or empty array  
+        useCases: product?.useCases || [], // Preserve existing or empty array
       };
 
-      console.log('[Wizard] Submitting product via Netlify Blobs:', cleanProduct);
+      console.log(`[Wizard] ${isEditMode ? 'Updating' : 'Creating'} product via Netlify Blobs:`, cleanProduct);
 
-      // Use Netlify Blobs API - no database, no auth required!
-      const response = await fetch('/api/products/add', {
+      // Use appropriate API endpoint for create or update
+      const endpoint = isEditMode ? '/api/products/update' : '/api/products/add';
+      const body = isEditMode 
+        ? JSON.stringify({ id: product.id, ...cleanProduct })
+        : JSON.stringify(cleanProduct);
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(cleanProduct),
+        body: body,
       });
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('[Wizard] API error response:', errorText);
-        throw new Error(`Failed to create product: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to ${isEditMode ? 'update' : 'create'} product: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
-      console.log('[Wizard] Product created successfully:', result);
+      console.log(`[Wizard] Product ${isEditMode ? 'updated' : 'created'} successfully:`, result);
       
-      toast.success(`Product "${productData.name}" created successfully!`);
+      toast.success(`Product "${productData.name}" ${isEditMode ? 'updated' : 'created'} successfully!`);
       onSuccess();
       
     } catch (error: any) {
-      console.error('[Wizard] Error creating product:', error);
-      toast.error(error.message || 'Failed to create product. Please try again.');
+      console.error(`[Wizard] Error ${isEditMode ? 'updating' : 'creating'} product:`, error);
+      toast.error(error.message || `Failed to ${isEditMode ? 'update' : 'create'} product. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -235,7 +248,7 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Package className="w-5 h-5" />
-              New Product Wizard
+              {isEditMode ? 'Edit Product' : 'New Product Wizard'}
             </CardTitle>
             <CardDescription>
               Step {currentStep} of 3 - {steps[currentStep - 1].description}
@@ -544,12 +557,12 @@ export function ProductWizard({ onSuccess, onCancel }: ProductWizardProps) {
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating Product...
+                  {isEditMode ? 'Updating Product...' : 'Creating Product...'}
                 </>
               ) : (
                 <>
                   <Package className="w-4 h-4 mr-2" />
-                  Create Product
+                  {isEditMode ? 'Update Product' : 'Create Product'}
                 </>
               )}
             </Button>

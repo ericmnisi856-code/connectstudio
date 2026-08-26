@@ -235,6 +235,7 @@ export function NewProductManager({ products, onRefresh }: NewProductManagerProp
           </DialogHeader>
           
           <ProductWizard
+            product={editingProduct}
             onSuccess={handleWizardSuccess}
             onCancel={() => {
               setShowWizard(false);
