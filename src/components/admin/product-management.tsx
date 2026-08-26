@@ -110,7 +110,7 @@ export function ProductManagement({
             <DialogHeader>
               <DialogTitle>Create New Product</DialogTitle>
             </DialogHeader>
-            <ProductForm onSubmit={handleCreate} />
+            <ProductForm key="create" onSubmit={handleCreate} />
           </DialogContent>
         </Dialog>
       </div>
@@ -167,6 +167,7 @@ export function ProductManagement({
                   </DialogHeader>
                   {selectedProduct && (
                     <ProductForm
+                      key={selectedProduct.slug}
                       product={selectedProduct}
                       onSubmit={(data) => handleUpdate(product.slug, data)}
                     />
@@ -214,6 +215,23 @@ function ProductForm({
   const [imagePreview, setImagePreview] = React.useState<string | null>(product?.image || null);
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Update form state when product changes (for edit mode)
+  React.useEffect(() => {
+    if (product) {
+      setHighlights(product.highlights || [""]);
+      setUseCases(product.useCases || [""]);
+      setSpecs(product.specs || [{ label: "", value: "" }]);
+      setImagePreview(product.image || null);
+    } else {
+      // Reset for create mode
+      setHighlights([""]);
+      setUseCases([""]);
+      setSpecs([{ label: "", value: "" }]);
+      setImagePreview(null);
+    }
+    setImageFile(null);
+  }, [product]);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
